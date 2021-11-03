@@ -67,4 +67,4 @@ tracker.show()
 ```
 
 ## Contributors
-- [Alexander Laut](https://alaut.gihub.io/sylt)
+- [Alexander Laut](https://alaut.github.io)
