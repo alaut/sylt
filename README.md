@@ -66,5 +66,10 @@ At any point, the bunch's phase space distribution can be visualized using __Tra
 tracker.show()
 ```
 
+## Development
+
+Sylt is hosted on [GitHub](https://github.com/alaut/sylt).
+
 ## Contributors
+
 - [Alexander Laut](https://alaut.github.io)
