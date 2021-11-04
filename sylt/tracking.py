@@ -4,7 +4,9 @@ from logging import error
 
 from dataclasses import dataclass
 
-from sylt.constants import c, e, Z_0
+from scipy.constants import value, c
+e = value('elementary charge')
+Z_0 = value('characteristic impedance of vacuum')
 
 
 def lam_parabolic(x, L):
