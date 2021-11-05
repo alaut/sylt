@@ -3,6 +3,7 @@ import numpy as np
 
 from sylt.analysis import twiss, project
 
+
 def plot_projections(x, y, ax, bins=100, hist_height=5):
     """plot projections of x, y distribution on a given axes"""
 
@@ -39,16 +40,18 @@ def plot_phase_space(data, keys, shape=None, title=None):
     for ax, (k1, k2) in zip(axes.flatten(), keys):
 
         x1, x2 = data[k1], data[k2]
-        tp, (xr, yr), caption = twiss(x1, x2)
+        ind = np.isfinite(x1) * np.isfinite(x2)
 
-        ax.plot(x1.ravel(), x2.ravel(), ',')
+        tp, (xr, yr), caption = twiss(x1[ind], x2[ind])
+
+        ax.plot(x1[ind], x2[ind], ',')
         ax.plot(xr(t), yr(t))
 
         ax.set_xlabel(k1)
         ax.set_ylabel(k2)
-        
+
         ax.annotate(caption, (0, 0), xycoords='axes fraction')
 
-        plot_projections(x1, x2, ax)
+        plot_projections(x1[ind], x2[ind], ax)
 
     return axes
