@@ -9,12 +9,13 @@ def twiss(x, y):
     cov = np.cov(x, y)
     area = np.sqrt(np.linalg.det(cov))
 
-    twiss_parameters = {
-        'emittance': area,
-        'alpha': -cov[0, 1]/area,
-        'beta': cov[0, 0]/area,
-        'gamma': cov[1, 1]/area,
-    }
+    with np.errstate(divide='ignore', invalid='ignore'):
+        twiss_parameters = {
+            'emittance': area,
+            'alpha': -cov[0, 1]/area,
+            'beta': cov[0, 0]/area,
+            'gamma': cov[1, 1]/area,
+        }
 
     ellipse_params = covariance_ellipse(cov)
 
@@ -69,4 +70,6 @@ def project(x, bins=100):
     """return domain, hist and gaussian fit of x"""
     h, xe = np.histogram(x, bins, density=True)
     xc = centers(xe)
-    return xc, h, norm.pdf(xc, *norm.fit(x))
+    with np.errstate(divide='ignore'):
+        fit = norm.pdf(xc, *norm.fit(x))
+    return xc, h, fit
