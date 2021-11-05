@@ -3,27 +3,27 @@ import numpy as np
 
 from sylt.analysis import twiss, project
 
-def plot_projections(x1, x2, ax, bins=100, hist_height=5):
+def plot_projections(x, y, ax, bins=100, hist_height=5):
     """plot projections of x, y distribution on a given axes"""
 
-    ax1, ax2 = ax.twinx(), ax.twiny()
+    axh, axv = ax.twinx(), ax.twiny()
 
-    xq1, h1, f1 = project(x1, bins)
-    xq2, h2, f2 = project(x2, bins)
+    xc, xh, x_fit = project(x, bins)
+    yc, yh, y_fit = project(y, bins)
 
-    ax1.plot(xq1, h1)
-    ax2.plot(h2, xq2)
+    axh.plot(xc, xh)
+    axv.plot(yh, yc)
 
-    ax1.plot(xq1, f1, ':')
-    ax2.plot(f2, xq2, ':')
+    axh.plot(xc, x_fit, ':')
+    axv.plot(y_fit, yc, ':')
 
-    ax1.set_ylim(0, hist_height*h1.max())
-    ax2.set_xlim(0, hist_height*h2.max())
+    axh.set_ylim(0, hist_height*xh.max())
+    axv.set_xlim(0, hist_height*yh.max())
 
-    ax1.set_axis_off()
-    ax2.set_axis_off()
+    axh.set_axis_off()
+    axv.set_axis_off()
 
-    return ax1, ax2
+    return axh, axv
 
 
 def plot_phase_space(data, keys, shape=None, title=None):
