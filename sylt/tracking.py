@@ -185,6 +185,17 @@ class Tracker:
         self.bunch.w = self.bunch.w + self.bunch.q*V
         self.bunch.tau = self.bunch.tau + self.T*self.kappa*self.bunch.w
 
+    def clean(self, verbose=False):
+        """assign NaN to particle's who's longitudinal position is external to the separatrix"""
+        tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
+        lost = (self.H(tau_hat, 0) - self.H(self.bunch.tau, self.bunch.w)) > 0
+
+        self.bunch.tau[lost] = np.nan
+        self.bunch.w[lost] = np.nan
+
+        if verbose:
+            print(f"lost {lost.sum()} particles of {lost.size}")
+
     def update(self):
         bunch = self.bunch
         ring = self.ring
