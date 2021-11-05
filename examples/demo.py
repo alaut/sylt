@@ -33,13 +33,10 @@ tracker = Tracker(bunch, ring)
 tracker.show('start')
 plt.show()
 
-for turn in range(5_000):
-
-    if turn % 100 == 0:
-        tracker.clean()
-
+for turn in range(1_000):
     tracker.track()
 
+tracker.clean()
 tracker.show('stop')
 
 plt.show()
