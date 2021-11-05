@@ -1,9 +1,11 @@
 import numpy as np
+from scipy.stats import norm
 
+from sylt.tools import centers
 
-def twiss(x, y, verbose=False):
+def twiss(x, y):
     """return twiss parameters and phase-space ellipse for bivariate distribution"""
-    # with np.errstate(divide='ignore', invalid='ignore'):
+
     cov = np.cov(x, y)
     area = np.sqrt(np.linalg.det(cov))
 
@@ -43,7 +45,7 @@ def covariance_ellipse(cov):
 
     theta = (np.pi / 2 if a < c else 0) if b == 0 else np.arctan2(lam_1 - a, b)
 
-    return {'a': lam_1**0.5, 'b': lam_2**0.5, 'th': theta}
+    return {'a': lam_1**0.5, 'b': lam_2**0.5, 'theta': theta}
 
 
 def rotated_ellipse(a=1, b=1, theta=0, verbose=False, dx=0, dy=0):
@@ -61,3 +63,10 @@ def rotated_ellipse(a=1, b=1, theta=0, verbose=False, dx=0, dy=0):
     def y(t): return a*np.sin(theta)*np.cos(t)+b*np.cos(theta)*np.sin(t)+dy
 
     return x, y
+
+
+def project(x, bins=100):
+    """return domain, hist and gaussian fit of x"""
+    h, xe = np.histogram(x, bins, density=True)
+    xc = centers(xe)
+    return xc, h, norm.pdf(xc, *norm.fit(x))
