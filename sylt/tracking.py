@@ -217,13 +217,14 @@ class Tracker:
             self.a = 2*np.sqrt(ring.beta*bunch.sig_eps +
                                ring.D**2*bunch.sig_delta()**2)
 
-    def separatrix(self, tau_hat):
-        tau = np.linspace(-tau_hat, tau_hat, 999)
+    def separatrix(self, phi_hat=None, phi=None):
+        if phi_hat is None:
+            phi_hat = np.pi-self.ring.vphi_s
+        if phi is None:
+            phi = np.linspace(-phi_hat, phi_hat, 299)
 
-        phi = self.ring.h*self.omega*tau
-        phi_hat = self.ring.h*self.omega*tau_hat
-
-        phi_dot = self.Omega*np.sqrt(2*(self.ring.W(phi_hat)-self.ring.W(phi)))
+        phi_dot = self.Omega * \
+            np.sqrt(0j+2*(self.ring.W(phi_hat)-self.ring.W(phi)))
         tau_dot = phi_dot/(self.ring.h*self.omega)
         w = tau_dot/self.kappa
         return tau, w
