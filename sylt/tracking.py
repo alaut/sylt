@@ -1,9 +1,6 @@
 import numpy as np
-
 from logging import error
-
 from dataclasses import dataclass
-
 from scipy.constants import value, c
 
 from sylt.plotting import plot_phase_space
