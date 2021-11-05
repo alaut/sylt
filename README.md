@@ -1,4 +1,4 @@
-# sylt
+# [sylt](https://alaut.github.io/sylt/)
 
 **SY**nchrotron **L**ongitudinal **T**racker
 
@@ -58,7 +58,7 @@ for turn in range(10_000):
     tracker.track()
 ```
 
-At any point, the bunch's phase space distribution can be visualized using __show__. Particle's whose trajectories are knowingly unstable can be removed by using the __clean__ method.
+At any point, the bunch's phase space distribution can be visualized using __show__. Particle's whose trajectories are knowingly unstable can be marked by using the __clean__ method.
 
 ```python
 tracker.clean()
@@ -69,7 +69,7 @@ tracker.show()
 
 ## Development
 
-Sylt is hosted on [GitHub](https://github.com/alaut/sylt).
+[Sylt](https://alaut.github.io/sylt/) is hosted on [GitHub](https://github.com/alaut/sylt).
 
 ## Contributors
 
