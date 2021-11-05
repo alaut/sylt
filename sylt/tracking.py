@@ -227,7 +227,54 @@ class Tracker:
             np.sqrt(0j+2*(self.ring.W(phi_hat)-self.ring.W(phi)))
         tau_dot = phi_dot/(self.ring.h*self.omega)
         w = tau_dot/self.kappa
-        return tau, w
+        return phi/(self.ring.h*self.omega), w
+
+    def show(self, title='distribution', alpha=0):
+        """show distribution assuming stable transverse optics"""
+
+        ring = self.ring
+        bunch = self.bunch
+
+        mu = np.array([
+            np.random.uniform(-np.pi, np.pi, bunch.n),
+            np.random.uniform(-np.pi, np.pi, bunch.n),
+        ])
+
+        u = np.sqrt(ring.beta*bunch.eps)*np.cos(mu)+ring.D*bunch.delta()
+        up = -np.sqrt(bunch.eps/ring.beta)*(alpha*np.cos(mu)+np.sin(mu))
+
+        data = {
+            "x (mm)": u[0]*1e3, "x' (mrad)": up[0]*1e3,
+            "y (mm)": u[1]*1e3, "y' (mrad)": up[1]*1e3,
+            "tau (ns)": bunch.tau*1e9, "w (MeV)": bunch.w*1e-6}
+
+        keys = [
+            ['x (mm)', "x' (mrad)"],
+            ['y (mm)', "y' (mrad)"],
+            ["x (mm)", "y (mm)"],
+            ["tau (ns)", 'w (MeV)'],
+        ]
+
+        axes = plot_phase_space(data, keys, (2, 2), f"{title}")
+
+        ax = axes.flatten()[-1]
+        for phi_max in [ring.h*self.omega*bunch.sig_tau, np.pi-ring.vphi_s]:
+            xs, ys = self.separatrix(phi_max)
+            ax.plot(xs*1e9, +ys.real*1e-6, 'm-')
+            ax.plot(xs*1e9, -ys.real*1e-6, 'm-')
+
+        axv = ax.secondary_yaxis('right', functions=(self.MeV2mm, self.mm2MeV))
+        axv.set_ylabel(r"$x$ (mm)")
+
+        return axes
+
+    def mm2MeV(self, mm):
+        C = self.bunch.beta**2*self.bunch.E/self.ring.alpha/self.ring.R
+        return mm*1e-3*C*1e-6
+
+    def MeV2mm(self, MeV):
+        C = self.bunch.beta**2*self.bunch.E/self.ring.alpha/self.ring.R
+        return MeV*1e6/C*1e3
 
     def match(self, sig_w=None, sig_tau=None, k=0):
         ring = self.ring
