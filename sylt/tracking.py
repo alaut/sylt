@@ -148,6 +148,11 @@ class Tracker:
         self.kappa = self.eta / (self.bunch.beta**2*self.bunch.E)
         self.nu = self.Omega/self.omega
 
+    def H(self, tau, w):
+        """return particle hamiltonion"""
+        phi = self.ring.h*self.omega*tau
+        return 0.5*self.kappa*w*w-self.bunch.q*self.ring.Vg/(2*np.pi*self.ring.h)*self.ring.G(phi)
+
     def V_RF(self):
         """compute RF voltage"""
         vphi = self.ring.h*self.omega*self.bunch.tau + self.ring.vphi_s
