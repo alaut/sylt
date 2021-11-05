@@ -5,6 +5,9 @@ from logging import error
 from dataclasses import dataclass
 
 from scipy.constants import value, c
+
+from sylt.plotting import plot_phase_space
+
 e = value('elementary charge')
 Z_0 = value('characteristic impedance of vacuum')
 
@@ -108,9 +111,9 @@ class Ring:
     Vg: np.ndarray
     gamma_t: float
 
-    beta: float = None
-    D: float = None
-    b: float = None
+    beta: float = 1
+    D: float = 0
+    b: float = np.inf
 
     vphi_s: np.ndarray = 0
 
@@ -132,7 +135,7 @@ class Tracker:
     bunch: object
     ring: object
 
-    UPDATE: bool = False
+    UPDATE: bool = True
     FIXED_MU: bool = False
     FIXED_SIG: bool = False
 
