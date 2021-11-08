@@ -261,7 +261,7 @@ class Tracker:
             ax.plot(xs*1e9, -ys.real*1e-6, 'm-')
 
         axv = ax.secondary_yaxis('right', functions=(self.MeV2mm, self.mm2MeV))
-        axv.set_ylabel(r"$x$ (mm)")
+        ax.annotate(r'$x$ (mm)', (1, 0.5), xycoords='axes fraction', rotation=90, horizontalalignment='right', verticalalignment='center')
 
         return axes
 
