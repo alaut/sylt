@@ -1,4 +1,4 @@
-# sylt
+# [sylt](https://alaut.github.io/sylt/)
 
 **SY**nchrotron **L**ongitudinal **T**racker
 
@@ -58,7 +58,7 @@ for turn in range(10_000):
     tracker.track()
 ```
 
-At any point, the bunch's phase space distribution can be visualized using __show__. Particle's whose trajectories are knowingly unstable can be removed by using the __clean__ method.
+At any point, the bunch's phase space distribution can be visualized using __show__. Particle's whose trajectories are knowingly unstable can be marked by using the __clean__ method.
 
 ```python
 tracker.clean()
@@ -73,8 +73,13 @@ The __tune spread__ of single particle motion (SPM), __tune shift__ of space cha
 
 ## Development
 
-Sylt is hosted on [GitHub](https://github.com/alaut/sylt).
+[Sylt](https://alaut.github.io/sylt/) is hosted on [GitHub](https://github.com/alaut/sylt).
 
 ## Contributors
 
 - [Alexander Laut](https://alaut.github.io)
+
+## References
+
+- A. Laut and A. Lasheen, “[Influence of Transverse Motion on Longitudinal Space Charge in the CERN PS](https://drive.google.com/open?id=1AdkxdEvXXhXO1ewIXUXm31VhAgo93jxw&authuser=alexanderlaut%40gmail.com&usp=drive_fs),” presented at the 64th ICFA Advanced Beam Dynamics Workshop, Fermilab, 2021.
+
