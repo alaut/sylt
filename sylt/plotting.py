@@ -47,11 +47,10 @@ def plot_phase_space(data, keys, shape=None, title=None):
         ax.plot(x1[ind], x2[ind], ',')
         ax.plot(xr(t), yr(t))
 
-        ax.set_xlabel(k1)
-        ax.set_ylabel(k2)
-
         ax.annotate(caption, (0, 0), xycoords='axes fraction')
-
+        ax.annotate(k1, (0.5, 0), xycoords='axes fraction', horizontalalignment='center')
+        ax.annotate(k2, (0, 0.5), xycoords='axes fraction', rotation=90, verticalalignment='center')
+        
         plot_projections(x1[ind], x2[ind], ax)
 
     return axes
