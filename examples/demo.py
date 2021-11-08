@@ -12,8 +12,6 @@ ring = Ring(
     beta=17,
     D=(2.66, 0),
     b=(73e-3, 35e-3),
-
-    # vphi_s=np.radians(10)
 )
 
 bunch = Bunch(
@@ -31,7 +29,6 @@ bunch = Bunch(
 tracker = Tracker(bunch, ring)
 
 tracker.show('start')
-plt.show()
 
 for turn in range(1_000):
     tracker.track()
@@ -39,6 +36,6 @@ for turn in range(1_000):
 tracker.clean()
 tracker.show('stop')
 
-plt.show()
+plt.savefig('./figs/demo.png')
 
 print('Finished !')

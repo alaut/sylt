@@ -33,9 +33,6 @@ class Bunch:
     q: int = 1      # particle charge
     E_0 = 938.272e6  # particle rest energy
 
-    FIXED_MU: bool = False
-    FIXED_SIG: bool = False
-
     TRAN_SHAPE: str = 'rayleigh'
     LONG_SHAPE: str = 'gaussian'
 
@@ -63,6 +60,17 @@ class Bunch:
         var = self.sig_tau**2
         lam = np.exp(-0.5*dev*dev/var)/np.sqrt(2*np.pi*var)
         return -dev*lam/var
+
+    def update(self, FIXED_MU=False, FIXED_SIG=False):
+        """update representative bunch statistics"""
+
+        if FIXED_MU:
+            self.mu_w = np.nanmean(self.w)
+            self.mu_tau = np.nanmean(self.tau)
+
+        if FIXED_SIG:
+            self.sig_w = np.nanstd(self.w)
+            self.sig_tau = np.nanstd(self.tau)
 
     def populate_emittance(self):
         if self.TRAN_SHAPE == 'rayleigh':
@@ -136,9 +144,6 @@ class Tracker:
     FIXED_MU: bool = False
     FIXED_SIG: bool = False
 
-    a: float = None
-    g: float = None
-
     def __post_init__(self):
         self.eta = -(1/self.bunch.gamma**2-1/self.ring.gamma_t**2)
         self.omega = self.bunch.beta*c/self.ring.R
@@ -167,7 +172,8 @@ class Tracker:
         bunch = self.bunch
         ring = self.ring
 
-        a = np.prod(self.a)**(1/self.a.size)
+        a = self.a()
+        a = np.prod(a)**(1/a.size)
         b = np.prod(ring.b)**(1/ring.b.size)
 
         r2 = np.mean(ring.beta*bunch.eps, 0) + \
@@ -180,7 +186,7 @@ class Tracker:
 
     def track(self):
         if self.UPDATE:
-            self.update()
+            self.bunch.update(self.FIXED_MU, self.FIXED_SIG)
 
         if self.bunch.N > 0:
             V = self.V_RF() + self.V_SC()
@@ -201,21 +207,12 @@ class Tracker:
         if verbose:
             print(f"lost {lost.sum()} particles of {lost.size}")
 
-    def update(self):
+    def a(self):
         bunch = self.bunch
         ring = self.ring
-
-        if not self.FIXED_MU:
-            bunch.mu_w = np.nanmean(bunch.w)
-            bunch.mu_tau = np.nanmean(bunch.tau)
-
-        if not self.FIXED_SIG:
-            bunch.sig_w = np.nanstd(bunch.w)
-            bunch.sig_tau = np.nanstd(bunch.tau)
-
-        if bunch.sig_eps is not None:
-            self.a = 2*np.sqrt(ring.beta*bunch.sig_eps +
-                               ring.D**2*bunch.sig_delta()**2)
+        a = 2*np.sqrt(ring.beta*bunch.sig_eps +
+                      ring.D**2*bunch.sig_delta()**2)
+        return a
 
     def separatrix(self, phi_hat=None, phi=None):
         if phi_hat is None:
@@ -284,6 +281,8 @@ class Tracker:
             sig_phi = ring.h*self.omega*sig_tau
             sig_w = np.sqrt(bunch.q*ring.Vg/(np.abs(self.kappa)*np.pi*ring.h)
                             * (1-np.cos(sig_phi)))
+        if sig_w is not None:
+            pass
 
         bunch.sig_tau = sig_tau*(1+k)
         bunch.sig_w = sig_w*(1-k)

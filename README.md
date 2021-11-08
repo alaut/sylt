@@ -65,7 +65,11 @@ tracker.clean()
 tracker.show()
 ```
 
-![demo](./examples/demo.png)
+![demo](./examples/figs/demo.png)
+
+The __tune spread__ of single particle motion (SPM), __tune shift__ of space charge (SC) and tune __blur__ due to effects of transverse motion (TM) are depicted below for comparison.
+
+![comparison](./examples/figs/comparison.png)
 
 ## Development
 
