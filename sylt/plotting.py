@@ -4,6 +4,8 @@ import numpy as np
 from sylt.analysis import twiss, project
 
 
+from scipy.special import ellipk
+
 def plot_projections(x, y, ax, bins=100, hist_height=5):
     """plot projections of x, y distribution on a given axes"""
 
@@ -54,3 +56,22 @@ def plot_phase_space(data, keys, shape=None, title=None):
         plot_projections(x1[ind], x2[ind], ax)
 
     return axes
+
+def plot_tune(DATA):
+    """"""
+    fig, ax = plt.subplots(num='tune', constrained_layout=True)
+    ax.set_ylabel(r"$\mu$")
+    ax.set_xlabel(r"$\hat{\phi}$")
+    ax.set_xlim(0, np.pi)
+    ax.set_ylim(0.5, 1.1)
+
+    phi_hat_q = np.linspace(0, np.pi, 300)
+    ax.plot(phi_hat_q, 1-phi_hat_q**2/16, 'k:')
+    ax.plot(phi_hat_q, np.pi/(2*ellipk(np.sin(phi_hat_q/2)**2)), 'k-')
+
+    for i, (key, data) in enumerate(DATA.items()):
+        ax.plot(data['phi_hat'], data['mu'], '.', alpha=0.33)
+        ax.plot([],[],f'C{i}.', label=key)
+
+
+    ax.legend(loc='upper right')

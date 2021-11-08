@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm
 
-import time
+from time import time
 from dataclasses import dataclass
 
 def limits(x, n=2):

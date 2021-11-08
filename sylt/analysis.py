@@ -73,3 +73,11 @@ def project(x, bins=100):
     with np.errstate(divide='ignore'):
         fit = norm.pdf(xc, *norm.fit(x))
     return xc, h, fit
+
+def compute_synchrotron_frequency(tau, T):
+    """given .npz data, compute fft along phase coordiant and estimate synchrotron frequency"""
+    amp = np.fft.rfft(tau, axis=0)
+    freq = np.fft.rfftfreq(n=tau.shape[0], d=T)
+    f = freq[np.argmax(amp, axis=0)]
+    tau_hat = np.max(tau, axis=0)
+    return tau_hat, f

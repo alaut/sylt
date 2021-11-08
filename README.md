@@ -71,6 +71,30 @@ The __tune spread__ of single particle motion (SPM), __tune shift__ of space cha
 
 ![comparison](./examples/figs/comparison.png)
 
+The relative time evolution of particles can be assessed by appending time data into an array and then computing an FFT to return a particle's synchrotron frequency as a function of it's maximum oscillation amplitude.
+
+```python
+DATA = {}
+for i, (key, tracker) in enumerate(trackers.items()):
+    tracker.UPDATE = False
+
+    tau = []
+    for turn in range(500_000):
+        tracker.track()
+        tau.append(tracker.bunch.tau)
+
+    tau_hat, f = compute_synchrotron_frequency(np.array(tau), tracker.T)
+
+    DATA[key] = {
+        'phi_hat': ring.h*tracker.omega*tau_hat,
+        'mu': 2*np.pi*f/tracker.Omega.real,
+    }
+```
+
+The evolving relative time data can be processed and depicted as a synchrotron frequency spectrum with using __sylt.plotting.plot_tune__.
+
+![tune](./examples/figs/tune.png)
+
 ## Development
 
 [Sylt](https://alaut.github.io/sylt/) is hosted on [GitHub](https://github.com/alaut/sylt).
