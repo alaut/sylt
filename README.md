@@ -2,6 +2,10 @@
 
 **SY**nchrotron **L**ongitudinal **T**racker
 
+## Introduction
+
+Sylt is a python package used to conveniently describe and analyze realistic longitudinal beam dynamics simulations in synchrotrons.
+
 ## Implementation
 
 The __Bunch__, __Ring__, and __Tracker__ objects must be imported.
