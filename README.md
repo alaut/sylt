@@ -114,14 +114,6 @@ The evolving relative time data can be processed and depicted as a synchrotron f
 
 ![tune](./examples/figs/tune.png)
 
-## Development
-
-[Sylt](https://alaut.github.io/sylt/) is hosted on [GitHub](https://github.com/alaut/sylt).
-
-## Contributors
-
-- [Alexander Laut](https://alaut.github.io)
-
 ## References
 
 - A. Laut and A. Lasheen, “[Influence of Transverse Motion on Longitudinal Space Charge in the CERN PS](https://drive.google.com/open?id=1AdkxdEvXXhXO1ewIXUXm31VhAgo93jxw&authuser=alexanderlaut%40gmail.com&usp=drive_fs),” presented at the 64th ICFA Advanced Beam Dynamics Workshop, Fermilab, 2021.
