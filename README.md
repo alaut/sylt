@@ -4,7 +4,7 @@
 
 ## Introduction
 
-Sylt is a python package used to conveniently describe and analyze realistic longitudinal beam dynamics simulations in synchrotrons.
+Sylt is a python package used to conveniently describe and analyse realistic longitudinal beam dynamics simulations in synchrotrons.
 
 ## Implementation
 
