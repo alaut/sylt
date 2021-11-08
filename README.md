@@ -67,7 +67,26 @@ tracker.show()
 
 ![demo](./examples/figs/demo.png)
 
-The __tune spread__ of single particle motion (SPM), __tune shift__ of space charge (SC) and __tune blur__ due to effects of transverse motion (TM) are depicted below for comparison.
+By setting ```Tracker.UPDATE = False```, macroparticles can be evaluated as ghost particles wherein the characteristic bunch statistics used to determine induced space charge voltage are held constant. Accordingly, the __tune spread__ of single particle motion (SPM), __tune shift__ of space charge (SC) and __tune blur__ due to effects of transverse motion (TM) can be compared by tracking the evolution of monoenergetic ghost particles.
+
+```python
+trackers = {
+    'SPM': Tracker(Bunch(E, sig_tau, sig_w, n), ring),
+    'SPM+SC': Tracker(Bunch(E, sig_tau, sig_w, n, N, sig_eps), ring),
+    'SPM+SC+TM': Tracker(Bunch(E, sig_tau, sig_w, n, N, sig_eps, eps=None), ring)
+}
+
+for key, tracker in trackers.items():
+
+    tracker.UPDATE = False
+
+    for turn in range(2_000):
+    
+        tracker.track()
+        tracker.clean()
+    
+        ax.plot(tracker.bunch.tau, tracker.bunch.w, label=key)
+```
 
 ![comparison](./examples/figs/comparison.png)
 
