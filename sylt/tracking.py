@@ -295,3 +295,17 @@ class Tracker:
             '',
         ]
         print('\n'.join(text))
+
+    def estimate_voltage(self, Omega):
+        """estimate effective voltage given observed synchrotron frequency"""
+        ring = self.ring
+        bunch = self.bunch
+        print(f"estimating voltage from Omega:{Omega*1e-3:0.3g} kHz")
+        V_eff = -(Omega*self.T)**2/(self.kappa*bunch.q *
+                                    2*np.pi*ring.h*np.cos(ring.vphi_s))
+        print(f"V_eff:{V_eff*1e-3:0.3g} kV")
+        mu_eff = 1-(ring.h*self.omega*bunch.sig_tau)**2/16
+        print(f"mu_eff:{mu_eff:0.3g}")
+        Vg = V_eff/mu_eff**2
+        print(f"Vg:{Vg*1e-3:0.3g} kV")
+        return Vg
