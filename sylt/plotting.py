@@ -9,6 +9,7 @@ from scipy.special import ellipk
 
 from datetime import datetime
 
+
 def plot_projections(x, y, ax, bins=100, hist_height=5):
     """plot projections of x, y distribution on a given axes"""
 
@@ -53,12 +54,15 @@ def plot_phase_space(data, keys, shape=None, title=None):
         ax.plot(xr(t), yr(t))
 
         ax.annotate(caption, (0, 0), xycoords='axes fraction')
-        ax.annotate(k1, (0.5, 0), xycoords='axes fraction', horizontalalignment='center')
-        ax.annotate(k2, (0, 0.5), xycoords='axes fraction', rotation=90, verticalalignment='center')
-        
+        ax.annotate(k1, (0.5, 0), xycoords='axes fraction',
+                    horizontalalignment='center')
+        ax.annotate(k2, (0, 0.5), xycoords='axes fraction',
+                    rotation=90, verticalalignment='center')
+
         plot_projections(x1[ind], x2[ind], ax)
 
     return axes
+
 
 def plot_tune(DATA):
     """"""
@@ -74,6 +78,11 @@ def plot_tune(DATA):
 
     for i, (key, data) in enumerate(DATA.items()):
         ax.plot(data['phi_hat'], data['mu'], '.', alpha=0.33)
+        ax.plot([], [], f'C{i}.', label=key)
+
+    ax.legend(loc='upper right')
+
+
 def plot_bunch_profiles(tau, t, lam, show=True):
     """analyze bunch length oscillations from longitudinal profile evolution"""
 

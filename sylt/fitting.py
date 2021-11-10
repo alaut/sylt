@@ -58,6 +58,5 @@ def fit_oscillator(x, y, omega=None):
 
     p0 = [np.max(y-y0), omega, y0, 0, 0]
     (A, omega, mu, phi, lam), _ = curve_fit(oscillator, x, y, p0)
-
-    eqn = eqn = f'${mu:0.1f}+{A:0.2f}\exp(-t/{1/lam:0.1f})\cos({omega:0.1f}t+{phi:0.2f})$'
+    eqn =  f'${mu:0.3g}+{A:0.3g}\exp(-t/{1/lam:0.3g})\cos({omega:0.3g}t+{phi:0.3g})$'
     return {'A': A, 'omega': omega, 'lam': lam, 'phi': phi, 'mu': mu}, eqn

@@ -196,7 +196,7 @@ class Tracker:
         self.bunch.w = self.bunch.w + self.bunch.q*V
         self.bunch.tau = self.bunch.tau + self.T*self.kappa*self.bunch.w
 
-    def clean(self, verbose=False):
+    def clean(self):
         """assign NaN to particle's who's longitudinal position is external to the separatrix"""
         tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
         lost = (self.H(tau_hat, 0) - self.H(self.bunch.tau, self.bunch.w)) > 0
@@ -204,8 +204,7 @@ class Tracker:
         self.bunch.tau[lost] = np.nan
         self.bunch.w[lost] = np.nan
 
-        if verbose:
-            print(f"lost {lost.sum()} particles of {lost.size}")
+        return lost
 
     def a(self):
         bunch = self.bunch
@@ -261,7 +260,8 @@ class Tracker:
             ax.plot(xs*1e9, -ys.real*1e-6, 'm-')
 
         axv = ax.secondary_yaxis('right', functions=(self.MeV2mm, self.mm2MeV))
-        ax.annotate(r'$x$ (mm)', (1, 0.5), xycoords='axes fraction', rotation=90, horizontalalignment='right', verticalalignment='center')
+        ax.annotate(r'$x$ (mm)', (1, 0.5), xycoords='axes fraction',
+                    rotation=90, horizontalalignment='right', verticalalignment='center')
 
         return axes
 
