@@ -3,8 +3,11 @@ import numpy as np
 
 from sylt.analysis import twiss, project
 
+from sylt.fitting import gauss, fit_gaussian, oscillator, fit_oscillator
 
 from scipy.special import ellipk
+
+from datetime import datetime
 
 def plot_projections(x, y, ax, bins=100, hist_height=5):
     """plot projections of x, y distribution on a given axes"""
@@ -71,7 +74,46 @@ def plot_tune(DATA):
 
     for i, (key, data) in enumerate(DATA.items()):
         ax.plot(data['phi_hat'], data['mu'], '.', alpha=0.33)
-        ax.plot([],[],f'C{i}.', label=key)
+def plot_bunch_profiles(tau, t, lam, show=True):
+    """analyze bunch length oscillations from longitudinal profile evolution"""
 
+    fit = {}
+    fit['gaussian'] = fit_gaussian(tau, lam)
+    fit['oscillator'], eqn = fit_oscillator(t, fit['gaussian']['var']**0.5)
 
-    ax.legend(loc='upper right')
+    if show:
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, num=None,
+                                       constrained_layout=True, sharex=True)
+
+        pcm = ax1.pcolormesh(t, tau, lam.T, cmap='Blues', shading='auto')
+
+        ax2.plot(t, fit['gaussian']['var']**0.5,
+                 '.', label=r"$\sigma_\tau(t)$")
+
+        signal = oscillator(t, **fit['oscillator'])
+        env = oscillator(t, A=fit['oscillator']['A'],
+                         lam=fit['oscillator']['lam'])
+
+        ax2.plot(t, signal)  # , label=eqn)
+        ax2.plot(t, fit['oscillator']['mu']+env, 'k--', lw=0.5)
+        ax2.plot(t, fit['oscillator']['mu']-env, 'k--', lw=0.5)
+
+        ax2.annotate(eqn, xy=(0, 0), xycoords='axes fraction')
+
+        ax2.set_xlabel(r"$t$ (ms)")
+        ax1.set_ylabel(r"$\tau$ (ns)")
+
+        plt.colorbar(pcm, ax=ax1, label=r'$\lambda(\tau)$ (ns$^{-1}$)')
+
+        ax1.plot(t, fit['gaussian']['mu'], label=r"$\mu_{\sigma_\tau}(t)$")
+        ax1.legend(loc='upper right')
+
+        ax2.legend(loc='upper right')
+        ax2.set_ylabel(r"$\tau$ (ns)")
+
+        N = np.sum(np.gradient(tau)*1e-9*lam, -1)
+        ax1.annotate(f"$<N>$:{np.mean(N):0.1e}",
+                     xy=(0, 0), xycoords='axes fraction')
+
+    return fit
