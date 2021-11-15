@@ -5,14 +5,13 @@ from scipy.constants import value, c
 
 from sylt.plotting import plot_phase_space
 
+from sylt.functions import parabolic
+
 e = value('elementary charge')
 Z_0 = value('characteristic impedance of vacuum')
 
 
-def lam_parabolic(x, L):
-    y = 3/(2*L)*(1-4*x**2/L**2)
-    y[np.abs(x) > L/2] = 0
-    return y
+
 
 
 @dataclass
@@ -38,8 +37,16 @@ class Bunch:
 
     def __post_init__(self):
         self.w = np.random.normal(self.mu_w, self.sig_w, self.n)
-        self.tau = np.random.normal(self.mu_tau, self.sig_tau, self.n)
 
+        if self.LONG_SHAPE == "gaussian":
+            self.tau = np.random.normal(self.mu_tau, self.sig_tau, self.n)
+        elif self.LONG_SHAPE == "parabolic":
+            L = 4*self.sig_tau
+            tau = np.linspace(-L/2, L/2, 1000)
+            p = parabolic(tau, L)
+            self.tau = np.random.choice(tau, size=self.n, p=p/p.sum())
+        else:
+            error(f'Unrecognized longitudinal shape {self.LONG_SHAPE}!')
         if self.eps is None:
             self.populate_emittance()
 
@@ -84,8 +91,9 @@ class Bunch:
                 np.random.exponential(self.sig_eps*2, self.n),
             ])
         elif self.TRAN_SHAPE == 'parabolic':
-            eq = np.linspace(4*self.sig_eps, 0, 1000, endpoint=False)
-            pq = lam_parabolic(eq, self.sig_eps*4)  # /epsq
+            L = 4*self.sig_eps
+            eq = np.linspace(L, 0, 1000, endpoint=False)
+            pq = parabolic(eq, L)
             self.eps = np.array([
                 np.random.choice(eq, self.n, p=pq/pq.sum()),
                 np.random.choice(eq, self.n, p=pq/pq.sum()),
@@ -196,10 +204,13 @@ class Tracker:
         self.bunch.w = self.bunch.w + self.bunch.q*V
         self.bunch.tau = self.bunch.tau + self.T*self.kappa*self.bunch.w
 
-    def clean(self):
+    def clean(self, tau=None, w=None):
         """assign NaN to particle's who's longitudinal position is external to the separatrix"""
+        tau = self.tau if tau is None else tau
+        w = self.w if w is None else w
+        
         tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
-        lost = (self.H(tau_hat, 0) - self.H(self.bunch.tau, self.bunch.w)) > 0
+        lost = (self.H(tau_hat, 0) - self.H(tau, w)) > 0
 
         self.bunch.tau[lost] = np.nan
         self.bunch.w[lost] = np.nan
@@ -223,7 +234,7 @@ class Tracker:
             np.sqrt(0j+2*(self.ring.W(phi_hat)-self.ring.W(phi)))
         tau_dot = phi_dot/(self.ring.h*self.omega)
         w = tau_dot/self.kappa
-        return phi/(self.ring.h*self.omega), w
+        return phi/(self.ring.h*self.omega), w.real
 
     def show(self, title='distribution', alpha=0):
         """show distribution assuming stable transverse optics"""
