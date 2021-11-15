@@ -11,18 +11,15 @@ e = value('elementary charge')
 Z_0 = value('characteristic impedance of vacuum')
 
 
-
-
-
 @dataclass
 class Bunch:
-    E: float    # particle energy
-    sig_tau: float  # width relative time
+    E: float            # particle energy
+    sig_tau: float      # width relative time
     sig_w: float = 0    # width relative energy
-    n: int = 10_000      # macroparticle number
+    n: int = 10_000     # macroparticle number
 
-    N: float = 0    # bunch intensity
-    sig_eps: float = None  # width emittance
+    N: float = 0        # bunch intensity
+    sig_eps: float = np.nan  # width emittance
 
     eps: float = 0       # assume particle emittance is zero
 
@@ -161,6 +158,9 @@ class Tracker:
         self.kappa = self.eta / (self.bunch.beta**2*self.bunch.E)
         self.nu = self.Omega/self.omega
 
+        self.tau_hat = self.T/self.ring.h/2
+        # self.tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
+
     def H(self, tau, w):
         """return particle hamiltonion"""
         phi = self.ring.h*self.omega*tau
@@ -206,11 +206,11 @@ class Tracker:
 
     def clean(self, tau=None, w=None):
         """assign NaN to particle's who's longitudinal position is external to the separatrix"""
-        tau = self.tau if tau is None else tau
-        w = self.w if w is None else w
-        
-        tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
-        lost = (self.H(tau_hat, 0) - self.H(tau, w)) > 0
+        tau = self.bunch.tau if tau is None else tau
+        w = self.bunch.w if w is None else w
+
+        lost = ((self.H(self.tau_hat, 0) - self.H(tau, w)) > 0) + \
+            (np.abs(tau) > self.tau_hat)
 
         self.bunch.tau[lost] = np.nan
         self.bunch.w[lost] = np.nan
@@ -290,13 +290,13 @@ class Tracker:
 
         if sig_tau is not None:
             sig_phi = ring.h*self.omega*sig_tau
-            sig_w = np.sqrt(bunch.q*ring.Vg/(np.abs(self.kappa)*np.pi*ring.h)
-                            * (1-np.cos(sig_phi)))
+            bunch.sig_w = np.sqrt(bunch.q*ring.Vg/(np.abs(self.kappa)*np.pi*ring.h)
+                                  * (1-np.cos(sig_phi)))
         if sig_w is not None:
             pass
 
-        bunch.sig_tau = sig_tau*(1+k)
-        bunch.sig_w = sig_w*(1-k)
+        bunch.sig_tau = bunch.sig_tau*(1+k)
+        bunch.sig_w = bunch.sig_w*(1-k)
         bunch.__post_init__()
 
         text = [
