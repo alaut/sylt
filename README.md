@@ -92,7 +92,7 @@ for key, tracker in trackers.items():
         ax.plot(tracker.bunch.tau, tracker.bunch.w, label=key)
 ```
 
-![comparison](./examples/figs/comparison.png)
+![comparison](./examples/figs/comparison.gif)
 
 The relative time evolution of particles can be assessed by appending time data into an array and then computing an FFT to return a particle's synchrotron frequency as a function of it's maximum oscillation amplitude.
 
