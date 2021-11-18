@@ -67,6 +67,7 @@ def plot_phase_space(data, keys, shape=None, title=None):
 def plot_tune(DATA):
     """"""
     fig, ax = plt.subplots(num='tune', constrained_layout=True)
+
     ax.set_ylabel(r"$\mu$")
     ax.set_xlabel(r"$\hat{\phi}$")
     ax.set_xlim(0, np.pi)
@@ -94,17 +95,17 @@ def plot_bunch_profiles(tau, t, lam, fit, num=None):
     fig, (ax1, ax2) = plt.subplots(2, 1, num=num,
                                        constrained_layout=True, sharex=True)
 
-        pcm = ax1.pcolormesh(t, tau, lam.T, cmap='Blues', shading='auto')
+    pcm = ax1.pcolormesh(1e3*t, 1e9*tau, lam.T, cmap='Blues', shading='auto')
 
-        ax2.plot(t, fit['gaussian']['var']**0.5,
+    ax2.plot(1e3*t, 1e9*fit['gaussian']['var']**0.5,
                  '.', label=r"$\sigma_\tau(t)$")
 
-        ax2.plot(t, signal)  # , label=eqn)
-        ax2.plot(t, fit['oscillator']['mu']+env, 'k--', lw=0.5)
-        ax2.plot(t, fit['oscillator']['mu']-env, 'k--', lw=0.5)
+    ax2.plot(1e3*t, 1e9*signal)  # , label=eqn)
+    ax2.plot(1e3*t, 1e9*(fit['oscillator']['mu']+env), 'k--', lw=0.5)
+    ax2.plot(1e3*t, 1e9*(fit['oscillator']['mu']-env), 'k--', lw=0.5)
 
     A, omega, lam, phi, mu = fit['oscillator'].values()
-    eqn = f"${mu:0.3g}+{A:0.3g}\exp(-t/{1/lam:0.3g})\cos({omega:0.3g}t+{phi:0.3g})$"
+    eqn = f"${1e9*mu:0.3g}+{1e9*A:0.3g}\exp(-t/{1e3*1/lam:0.3g})\cos({1e-3*omega:0.3g}t+{phi:0.3g})$"
         ax2.annotate(eqn, xy=(0, 0), xycoords='axes fraction')
 
         ax2.set_xlabel(r"$t$ (ms)")
@@ -112,8 +113,7 @@ def plot_bunch_profiles(tau, t, lam, fit, num=None):
 
     fig.colorbar(pcm, ax=ax1, label=r'$\lambda(\tau)$ (ns$^{-1}$)')
 
-        ax1.plot(t, fit['gaussian']['mu'], label=r"$\mu_{\sigma_\tau}(t)$")
-        ax1.legend(loc='upper right')
+    ax1.plot(1e3*t, 1e9*fit['gaussian']['mu'], label=r"$\mu_{\sigma_\tau}(t)$")
 
     ax2.set_ylabel(r"$\sigma_\tau$ (ns)")
 
