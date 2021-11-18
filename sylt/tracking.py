@@ -3,9 +3,10 @@ from logging import error
 from dataclasses import dataclass
 from scipy.constants import value, c
 
-from sylt.plotting import plot_phase_space
+import sylt.plotting
 
 from sylt.functions import parabolic
+from sylt.geometry import bivariate_binomial
 
 e = value('elementary charge')
 Z_0 = value('characteristic impedance of vacuum')
@@ -16,7 +17,7 @@ class Bunch:
     E: float            # particle energy
     sig_tau: float      # width relative time
     sig_w: float = 0    # width relative energy
-    n: int = 10_000     # macroparticle number
+    n: int = 40_000     # macroparticle number (~0.5% error)
 
     N: float = 0        # bunch intensity
     sig_eps: float = np.nan  # width emittance
@@ -42,6 +43,10 @@ class Bunch:
             tau = np.linspace(-L/2, L/2, 1000)
             p = parabolic(tau, L)
             self.tau = np.random.choice(tau, size=self.n, p=p/p.sum())
+        elif self.LONG_SHAPE == "binomial":
+            self.tau, self.w = bivariate_binomial(
+                a=2*self.sig_tau, b=2*self.sig_w, n=self.n,
+            )
         else:
             error(f'Unrecognized longitudinal shape {self.LONG_SHAPE}!')
         if self.eps is None:
@@ -262,7 +267,7 @@ class Tracker:
             ["tau (ns)", 'w (MeV)'],
         ]
 
-        axes = plot_phase_space(data, keys, (2, 2), f"{title}")
+        axes = plotting.plot_phase_space(data, keys, (2, 2), f"{title}")
 
         ax = axes.flatten()[-1]
         for phi_max in [ring.h*self.omega*bunch.sig_tau, np.pi-ring.vphi_s]:
