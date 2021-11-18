@@ -3,8 +3,7 @@ from logging import error
 from dataclasses import dataclass
 from scipy.constants import value, c
 
-import sylt.plotting
-
+from sylt.plotting import plot_phase_space
 from sylt.functions import parabolic
 from sylt.geometry import bivariate_binomial
 
@@ -267,7 +266,7 @@ class Tracker:
             ["tau (ns)", 'w (MeV)'],
         ]
 
-        axes = plotting.plot_phase_space(data, keys, (2, 2), f"{title}")
+        axes = plot_phase_space(data, keys, (2, 2), f"{title}")
 
         ax = axes.flatten()[-1]
         for phi_max in [ring.h*self.omega*bunch.sig_tau, np.pi-ring.vphi_s]:
