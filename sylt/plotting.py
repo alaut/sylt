@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.special as sp
+import numpy as np
 
-from sylt.analysis import twiss, project
+import sylt
 
 from sylt.fitting import oscillator
 
@@ -15,8 +17,8 @@ def plot_projections(x, y, ax, bins=100, hist_height=5):
 
     axh, axv = ax.twinx(), ax.twiny()
 
-    xc, xh, x_fit = project(x, bins)
-    yc, yh, y_fit = project(y, bins)
+    xc, xh, x_fit = sylt.analysis.project(x, bins)
+    yc, yh, y_fit = sylt.analysis.project(y, bins)
 
     axh.plot(xc, xh)
     axv.plot(yh, yc)
@@ -48,7 +50,7 @@ def plot_phase_space(data, keys, shape=None, title=None):
         x1, x2 = data[k1], data[k2]
         ind = np.isfinite(x1) * np.isfinite(x2)
 
-        tp, (xr, yr), caption = twiss(x1[ind], x2[ind])
+        tp, (xr, yr), caption = sylt.analysis.twiss(x1[ind], x2[ind])
 
         ax.plot(x1[ind], x2[ind], ',')
         ax.plot(xr(t), yr(t))
@@ -75,7 +77,7 @@ def plot_tune(DATA):
 
     phi_hat_q = np.linspace(0, np.pi, 300)
     ax.plot(phi_hat_q, 1-phi_hat_q**2/16, 'k:')
-    ax.plot(phi_hat_q, np.pi/(2*ellipk(np.sin(phi_hat_q/2)**2)), 'k-')
+    ax.plot(phi_hat_q, np.pi/(2*sp.ellipk(np.sin(phi_hat_q/2)**2)), 'k-')
 
     for i, (key, data) in enumerate(DATA.items()):
         ax.plot(data['phi_hat'], data['mu'], '.', alpha=0.33)
@@ -87,8 +89,8 @@ def plot_tune(DATA):
 def plot_bunch_profiles(tau, t, lam, fit, num=None):
     """plot bunch length oscillations from longitudinal profile evolution"""
 
-    signal = oscillator(t, **fit['oscillator'])
-    env = oscillator(t, A=fit['oscillator']['A'],
+    signal = sylt.fitting.oscillator(t, **fit['oscillator'])
+    env = sylt.fitting.oscillator(t, A=fit['oscillator']['A'],
                      lam=fit['oscillator']['lam'])
     N = np.sum(np.gradient(tau)*lam, -1)
 
@@ -100,7 +102,7 @@ def plot_bunch_profiles(tau, t, lam, fit, num=None):
     ax2.plot(1e3*t, 1e9*fit['gaussian']['var']**0.5,
                  '.', label=r"$\sigma_\tau(t)$")
 
-    ax2.plot(1e3*t, 1e9*signal)  # , label=eqn)
+    ax2.plot(1e3*t, 1e9*signal)
     ax2.plot(1e3*t, 1e9*(fit['oscillator']['mu']+env), 'k--', lw=0.5)
     ax2.plot(1e3*t, 1e9*(fit['oscillator']['mu']-env), 'k--', lw=0.5)
 
