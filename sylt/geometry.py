@@ -4,7 +4,7 @@ import numpy as np
 from sylt.functions import binomial
 
 
-def bivariate_binomial(a, b, n, x0=0, y0=0, nx=999, ny=1001, mu=1):
+def bivariate_binomial(a, b, n, x0=0, y0=0, nx=299, ny=301, mu=1):
 
     x, y = np.meshgrid(
         x0 + a*np.linspace(-1, 1, nx),
@@ -14,7 +14,8 @@ def bivariate_binomial(a, b, n, x0=0, y0=0, nx=999, ny=1001, mu=1):
     x, y = x.flatten(), y.flatten()
 
     r = ((x-x0)/a)**2+((y-y0)/b)**2
-    f = binomial(r**0.5, 0, 2, mu=mu)
+
+    f = 1-r**2
 
     f[f < 0] = 0
 

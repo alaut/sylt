@@ -46,6 +46,21 @@ def fit_gaussian(x, Y):
     return {'mu': fit[:, 0], 'var': fit[:, 1], 'amp': fit[:, 2]}
 
 
+def fit_binomial(x, Y):
+    X0, VAR = moments_array(x, Y)
+    AMP = np.max(Y, -1)
+    fit = []
+    for y, x0, var, amp in zip(Y, X0, VAR, AMP):
+        try:
+            p0 = [4*var**0.5, amp, x0]
+            popt, pcov = curve_fit(binomial, x, y, p0=p0)
+        except:
+            popt = [np.nan, np.nan, np.nan, np.nan]
+        fit.append(popt)
+    fit = np.array(fit)
+    return {'L': fit[:, 0], 'amp': fit[:, 1], 'x0': fit[:, 2]}
+
+
 def fit_oscillator(x, y, omega=None):
     """ given damped oscillation y along x, return signal envelope"""
 

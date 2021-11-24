@@ -86,41 +86,74 @@ def plot_tune(DATA):
     ax.legend(loc='upper right')
 
 
-def plot_bunch_profiles(tau, t, lam, fit, num=None):
+def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=True):
     """plot bunch length oscillations from longitudinal profile evolution"""
 
-    signal = sylt.fitting.oscillator(t, **fit['oscillator'])
-    env = sylt.fitting.oscillator(t, A=fit['oscillator']['A'],
+    signal = oscillator(t, **fit['oscillator'])
+    env = oscillator(t, A=fit['oscillator']['A'],
                      lam=fit['oscillator']['lam'])
     N = np.sum(np.gradient(tau)*lam, -1)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, num=num,
-                                       constrained_layout=True, sharex=True)
+    figs = {}
 
-    pcm = ax1.pcolormesh(1e3*t, 1e9*tau, lam.T, cmap='Blues', shading='auto')
+    if waterfall:
 
-    ax2.plot(1e3*t, 1e9*fit['gaussian']['var']**0.5,
-                 '.', label=r"$\sigma_\tau(t)$")
+        series = (
+            (r'$\lambda(\tau)$', lam.T, '-'),
+            # ('gaussian', gauss(tau[:, np.newaxis], **fit['gaussian']), '--'),
+            ('binomial', binomial(tau[:, np.newaxis], **fit['binomial']), ':'),
+        )
 
-    ax2.plot(1e3*t, 1e9*signal)
-    ax2.plot(1e3*t, 1e9*(fit['oscillator']['mu']+env), 'k--', lw=0.5)
-    ax2.plot(1e3*t, 1e9*(fit['oscillator']['mu']-env), 'k--', lw=0.5)
+        k = t.max()/(3*lam.max())
+        ind = np.arange(0, t.size, int(t.size/10))
 
-    A, omega, lam, phi, mu = fit['oscillator'].values()
-    eqn = f"${1e9*mu:0.3g}+{1e9*A:0.3g}\exp(-t/{1e3*1/lam:0.3g})\cos({1e-3*omega:0.3g}t+{phi:0.3g})$"
-        ax2.annotate(eqn, xy=(0, 0), xycoords='axes fraction')
+        figs['waterfall'], ax1 = plt.subplots(constrained_layout=True)
+        for key, y, linespec in series:
+            ax1.plot(tau*1e9, 1e3*(t+k*y)[:, ind], linespec)
+            ax1.plot([], [], f"k{linespec}", label=key)
+        ax1.set_xlabel(r"$\tau$ (ns)")
+        ax1.set_ylabel(r"$t$ (ms)")
+        ax1.set_xlim(1e9*tau.min(), 1e9*tau.max())
+        ax1.legend(loc='upper right')
 
-        ax2.set_xlabel(r"$t$ (ms)")
-        ax1.set_ylabel(r"$\tau$ (ns)")
-
-    fig.colorbar(pcm, ax=ax1, label=r'$\lambda(\tau)$ (ns$^{-1}$)')
-
-    ax1.plot(1e3*t, 1e9*fit['gaussian']['mu'], label=r"$\mu_{\sigma_\tau}(t)$")
-
-    ax2.set_ylabel(r"$\sigma_\tau$ (ns)")
-
-        N = np.sum(np.gradient(tau)*1e-9*lam, -1)
-        ax1.annotate(f"$<N>$:{np.mean(N):0.1e}",
+    if contour:
+        figs['contour'], ax2 = plt.subplots(constrained_layout=True)
+        pcm = ax2.pcolormesh(1e3*t, 1e9*tau, lam.T,
+                             cmap='Blues', shading='auto')
+        ax2.set_ylabel(r"$\tau$ (ns)")
+        ax2.set_ylabel(r"$t$ (ms)")
+        figs['contour'].colorbar(
+            pcm, ax=ax2, label=r'$\lambda(\tau)$ (ns$^{-1}$)')
+        ax2.plot(1e3*t, 1e9*fit['gaussian']['mu'],
+                 label=r"$\mu_{\sigma_\tau}(t)$")
+        ax2.annotate(f"$<N>$:{np.mean(N):0.1e}",
                      xy=(0, 0), xycoords='axes fraction')
 
-    return fit
+        ax2.set_ylim(
+            1e9*(np.mean(fit['gaussian']['mu']+3*fit['gaussian']['var']**0.5)),
+            1e9*(np.mean(fit['gaussian']['mu']-3*fit['gaussian']['var']**0.5)),
+        )
+
+
+    if decay:
+
+        amp, omega, lam, phi, mu = fit['oscillator'].values()
+
+        series = (
+            # (r"$\sigma_\tau(t)$", fit['gaussian']['var']**0.5, '.'),
+            (r"$L_\tau(t)/4$", fit['binomial']['L'] / 4, '.'),
+            (f"${1e9*mu:0.3g}+{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})\cos({1e-3*omega:0.3g}t{phi:+0.3g})$", signal, '-'),
+            (f"${1e9*mu:0.3g}+{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})$", fit['oscillator']['mu']+env, ':'),
+            (f"${1e9*mu:0.3g}-{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})$", fit['oscillator']['mu']-env, ':'),
+        )
+
+        figs['decay'], ax3 = plt.subplots(constrained_layout=True)
+        for key, y, linespec in series:
+            ax3.plot(1e3*t, 1e9*y, linespec, label=key)
+
+        ax3.set_xlim(1e3*t.min(), 1e3*t.max())
+        ax3.set_xlabel(r"$t$ (ms)")
+        ax3.set_ylabel(r"$\sigma_\tau$ (ns)")
+        ax3.legend(loc='upper right')
+
+    return figs
