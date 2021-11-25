@@ -19,54 +19,56 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
         out['exp']['figs'] = plot_bunch_profiles(tau, t, lam, out['exp']['fit'])
 
     if simulate:
-        out['sim'] = {}
+        for mode in ['SC', 'SC+TM']:
+            out[mode] = {}
+            eps = None if mode == 'SC+TM' else 0
 
-        N = np.max(out['exp']['fit']['binomial']['amp'])
-        print(f"N:{N:0.3e}")
+            N = np.max(out['exp']['fit']['binomial']['amp'])
+            print(f"N:{N:0.3e}")
 
-        mu_sig_tau = out['exp']['fit']['oscillator']['mu']
+            mu_sig_tau = out['exp']['fit']['oscillator']['mu']
 
-        bunch = Bunch(
-            E=2.938272e9,
-            sig_w=4e6,
-            sig_tau=mu_sig_tau,
-            n=40_000,     # 0.5% error
-            N=N,
-            sig_eps=sig_eps,
-            LONG_SHAPE='binomial',
-            eps=None,
-        )
+            bunch = Bunch(
+                E=2.938272e9,
+                sig_w=4e6,
+                sig_tau=mu_sig_tau,
+                n=40_000,     # 0.5% error
+                N=N,
+                sig_eps=sig_eps,
+                LONG_SHAPE='binomial',
+                eps=eps,
+            )
 
-        tracker = Tracker(bunch, Ring(), FIXED_MU=True)
+            tracker = Tracker(bunch, Ring(), FIXED_MU=True)
 
-        tracker.estimate_voltage(Omega=out['exp']['fit']['oscillator']['omega']/2)
+            tracker.estimate_voltage(Omega=out['exp']['fit']['oscillator']['omega']/2)
 
-        tracker.match(
-            sig_tau=mu_sig_tau,
-            k=out['exp']['fit']['oscillator']['A']/mu_sig_tau,
-        )
+            tracker.match(
+                sig_tau=mu_sig_tau,
+                k=out['exp']['fit']['oscillator']['A']/mu_sig_tau,
+            )
 
-        turns = np.arange(12_000)
-        t = turns*tracker.T
-        tau = np.linspace(-1, 1, 99)*bunch.sig_tau*3
-        dt = np.mean(np.diff(tau))
+            turns = np.arange(12_000)
+            t = turns*tracker.T
+            tau = np.linspace(-1, 1, 99)*bunch.sig_tau*3
+            dt = np.mean(np.diff(tau))
 
-        LAM = []
-        print('tracking ...')
-        for turn in turns:
-            tracker.track()
+            LAM = []
+            print('tracking ...')
+            for turn in turns:
+                tracker.track()
 
-            if turn % 1_000 == 0:
-                tracker.clean()
+                if turn % 1_000 == 0:
+                    tracker.clean()
 
-            lam, _ = np.histogram(tracker.bunch.tau, tau)
-            LAM.append(lam/dt/tracker.bunch.n*N)
+                lam, _ = np.histogram(tracker.bunch.tau, tau)
+                LAM.append(lam/dt/tracker.bunch.n*N)
 
-        LAM = np.array(LAM)
+            LAM = np.array(LAM)
 
-        out['sim']['fit'] = analyze_bunch_profiles(centers(tau), t, LAM)
+            out[mode]['fit'] = analyze_bunch_profiles(centers(tau), t, LAM)
 
-        if show:
-            out['sim']['figs'] = plot_bunch_profiles(centers(tau), t, LAM, out['sim']['fit'])
+            if show:
+                out[mode]['figs'] = plot_bunch_profiles(centers(tau), t, LAM, out[mode]['fit'])
 
     return out
