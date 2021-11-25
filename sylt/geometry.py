@@ -1,8 +1,4 @@
-import matplotlib.pyplot as plt
 import numpy as np
-
-from sylt.functions import binomial
-
 
 def bivariate_binomial(a, b, n, x0=0, y0=0, nx=299, ny=301, mu=1):
 
