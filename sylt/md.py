@@ -29,7 +29,7 @@ def load_md_data(filename, skip_rows=98):
         'pickup_sensitivity': float(header[97]),
     }
 
-    data['tau'] = np.arange(data['n_bins'])*data['bin_width']
+    data['tau'] = np.linspace(-0.5, 0.5, data['n_bins'])*data['bin_width']*data['n_bins']
     data['turns'] = np.arange(data['n_frames'])*data['turns_frame']
     data['V'] = np.reshape(V_scope, (data['n_frames'], data['n_bins']))
 
