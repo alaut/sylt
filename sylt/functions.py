@@ -12,6 +12,6 @@ def gaussian(dev, var):
 
 def binomial(x, L, amp=1, x0=0, mu=1.12):
     dev = x-x0
-    y = amp*2*gamma(3/2+mu)/(L*np.sqrt(np.pi)*gamma(1+mu))*(1-4*dev*dev/L**2)**mu
+    y = amp*2*gamma(3/2+mu)/(L*np.sqrt(np.pi)*gamma(1+mu))*(0j+1-4*dev*dev/L**2)**mu
     y[np.abs(dev) > L/2] = 0
-    return y
+    return y.real
