@@ -26,7 +26,7 @@ if __name__ == "__main__":
         tracker.UPDATE = False
         tracker.bunch.w[:ng] = np.zeros(ng)
         tracker.bunch.tau[:ng] = np.random.choice(
-            np.linspace(-1, 1, 300)*tracker.tau_hat, ng)
+            np.linspace(0, 1, 300)*tracker.tau_hat, ng)
 
         # Track Particles
         data = np.empty((2, NUM_TURNS, n))
