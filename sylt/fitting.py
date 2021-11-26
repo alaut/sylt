@@ -2,16 +2,19 @@ from scipy.optimize import curve_fit
 
 import numpy as np
 
+from sylt.functions import binomial
+
 
 def oscillator(t, A, omega=0, mu=0, phi=0, lam=0):
     """return signal for damped oscillator with complex amplitude amp, fundamental omega and decay lam """
     return A*np.cos(omega*t+phi)*np.exp(-lam*t)+mu
 
 
-def gauss(x, mu, var, amp):
+def gauss(x, mu, var, amp=1):
     """return pdf(x) for gaussian distribution"""
     dev = x-mu
-    return amp*np.exp(-0.5*dev*dev/var)
+    f = np.exp(-0.5*dev*dev/var)/np.sqrt(2*np.pi*var)
+    return amp*f
 
 
 def moments_array(x, y):
@@ -52,13 +55,13 @@ def fit_binomial(x, Y):
     fit = []
     for y, x0, var, amp in zip(Y, X0, VAR, AMP):
         try:
-            p0 = [4*var**0.5, amp, x0]
+            p0 = [var**0.5, amp, x0]
             popt, pcov = curve_fit(binomial, x, y, p0=p0)
         except:
             popt = [np.nan, np.nan, np.nan, np.nan]
         fit.append(popt)
     fit = np.array(fit)
-    return {'L': fit[:, 0], 'amp': fit[:, 1], 'x0': fit[:, 2]}
+    return {'sig': fit[:, 0], 'amp': fit[:, 1], 'x0': fit[:, 2]}
 
 
 def fit_oscillator(x, y, omega=None):
@@ -73,5 +76,5 @@ def fit_oscillator(x, y, omega=None):
 
     p0 = [np.max(y-y0), omega, y0, 0, 0]
     (A, omega, mu, phi, lam), _ = curve_fit(oscillator, x, y, p0)
-    
+
     return {'A': A, 'omega': omega, 'lam': lam, 'phi': phi, 'mu': mu}

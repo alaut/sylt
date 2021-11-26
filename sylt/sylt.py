@@ -16,7 +16,8 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
     out['exp']['fit'] = analyze_bunch_profiles(tau, t, lam)
 
     if show:
-        out['exp']['figs'] = plot_bunch_profiles(tau, t, lam, out['exp']['fit'])
+        out['exp']['figs'] = plot_bunch_profiles(
+            tau, t, lam, out['exp']['fit'])
 
     if simulate:
         for mode in ['SC', 'SC+TM']:
@@ -41,7 +42,8 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
 
             tracker = Tracker(bunch, Ring(), FIXED_MU=True)
 
-            tracker.estimate_voltage(Omega=out['exp']['fit']['oscillator']['omega']/2)
+            tracker.estimate_voltage(
+                Omega=out['exp']['fit']['oscillator']['omega']/2)
 
             tracker.match(
                 sig_tau=mu_sig_tau,
@@ -69,6 +71,7 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
             out[mode]['fit'] = analyze_bunch_profiles(centers(tau), t, LAM)
 
             if show:
-                out[mode]['figs'] = plot_bunch_profiles(centers(tau), t, LAM, out[mode]['fit'])
+                out[mode]['figs'] = plot_bunch_profiles(
+                    centers(tau), t, LAM, out[mode]['fit'])
 
     return out

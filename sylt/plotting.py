@@ -2,8 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.special as sp
 import numpy as np
+import matplotlib.cm as cm
 
-import sylt
+from sylt.analysis import project, twiss
+from sylt.fitting import oscillator, gauss
+from sylt.functions import binomial
 
 from sylt.fitting import oscillator
 
@@ -17,8 +20,8 @@ def plot_projections(x, y, ax, bins=100, hist_height=5):
 
     axh, axv = ax.twinx(), ax.twiny()
 
-    xc, xh, x_fit = sylt.analysis.project(x, bins)
-    yc, yh, y_fit = sylt.analysis.project(y, bins)
+    xc, xh, x_fit = project(x, bins)
+    yc, yh, y_fit = project(y, bins)
 
     axh.plot(xc, xh)
     axv.plot(yh, yc)
@@ -45,12 +48,12 @@ def plot_phase_space(data, keys, shape=None, title=None):
 
     t = np.linspace(0, 2*np.pi, 50)
 
-    for ax, (k1, k2) in zip(axes.flatten(), keys):
+    for ax, (k1, k2) in zip(axes, keys):
 
         x1, x2 = data[k1], data[k2]
         ind = np.isfinite(x1) * np.isfinite(x2)
 
-        tp, (xr, yr), caption = sylt.analysis.twiss(x1[ind], x2[ind])
+        tp, (xr, yr), caption = twiss(x1[ind], x2[ind])
 
         ax.plot(x1[ind], x2[ind], ',')
         ax.plot(xr(t), yr(t))
@@ -63,7 +66,7 @@ def plot_phase_space(data, keys, shape=None, title=None):
 
         plot_projections(x1[ind], x2[ind], ax)
 
-    return axes
+    return fig, axes
 
 
 def plot_tune(DATA):
@@ -105,7 +108,7 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
         )
 
         k = t.max()/(3*lam.max())
-        ind = np.arange(0, t.size, int(t.size/10))
+        ind = np.arange(0, t.size, int(t.size/20))
 
         figs['waterfall'], ax1 = plt.subplots(constrained_layout=True)
         for key, y, linespec in series:
@@ -113,7 +116,7 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
             ax1.plot([], [], f"k{linespec}", label=key)
         ax1.set_xlabel(r"$\tau$ (ns)")
         ax1.set_ylabel(r"$t$ (ms)")
-        ax1.set_xlim(1e9*tau.min(), 1e9*tau.max())
+        ax1.set_xlim(1e9*np.mean(4*fit['binomial']['sig'])*np.array([-0.75, 0.75]))
         ax1.legend(loc='upper right')
 
     if contour:
@@ -121,12 +124,12 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
         pcm = ax2.pcolormesh(1e3*t, 1e9*tau, lam.T,
                              cmap='Blues', shading='auto')
         ax2.set_ylabel(r"$\tau$ (ns)")
-        ax2.set_ylabel(r"$t$ (ms)")
+        ax2.set_xlabel(r"$t$ (ms)")
         figs['contour'].colorbar(
             pcm, ax=ax2, label=r'$\lambda(\tau)$ (ns$^{-1}$)')
-        ax2.plot(1e3*t, 1e9*fit['gaussian']['mu'],
+        ax2.plot(1e3*t, 1e9*fit['gaussian']['mu'],'k-',
                  label=r"$\mu_{\sigma_\tau}(t)$")
-        ax2.annotate(f"$<N>$:{np.mean(N):0.1e}",
+        ax2.annotate(f"$<N>$:{np.mean(N):0.2e}",
                      xy=(0, 0), xycoords='axes fraction')
 
         ax2.set_ylim(
@@ -141,10 +144,12 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
 
         series = (
             # (r"$\sigma_\tau(t)$", fit['gaussian']['var']**0.5, '.'),
-            (r"$L_\tau(t)/4$", fit['binomial']['L'] / 4, '.'),
+            (r"$L_\tau(t)/4$", fit['binomial']['sig'], '.'),
             (f"${1e9*mu:0.3g}+{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})\cos({1e-3*omega:0.3g}t{phi:+0.3g})$", signal, '-'),
-            (f"${1e9*mu:0.3g}+{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})$", fit['oscillator']['mu']+env, ':'),
-            (f"${1e9*mu:0.3g}-{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})$", fit['oscillator']['mu']-env, ':'),
+            (f"${1e9*mu:0.3g}+{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})$",
+             fit['oscillator']['mu']+env, ':'),
+            (f"${1e9*mu:0.3g}-{1e9*amp:0.3g}\exp(-t/{1e3/lam:0.3g})$",
+             fit['oscillator']['mu']-env, ':'),
         )
 
         figs['decay'], ax3 = plt.subplots(constrained_layout=True)

@@ -1,10 +1,10 @@
 import numpy as np
-from logging import error
+
 from dataclasses import dataclass
 from scipy.constants import value, c
 
 from sylt.plotting import plot_phase_space
-from sylt.functions import parabolic
+from sylt.functions import binomial_der
 from sylt.geometry import bivariate_binomial
 
 e = value('elementary charge')
@@ -13,10 +13,10 @@ Z_0 = value('characteristic impedance of vacuum')
 
 @dataclass
 class Bunch:
-    E: float            # particle energy
-    sig_tau: float      # width relative time
-    sig_w: float = 0    # width relative energy
-    n: int = 40_000     # macroparticle number (~0.5% error)
+    E: float                # particle energy
+    sig_tau: float = 30e-9    # width relative time
+    sig_w: float = 4e6      # width relative energy
+    n: int = 40_000         # macroparticle number (~0.5% error)
 
     N: float = 0        # bunch intensity
     sig_eps: float = np.nan  # width emittance
@@ -29,22 +29,16 @@ class Bunch:
     q: int = 1      # particle charge
     E_0 = 938.272e6  # particle rest energy
 
-    TRAN_SHAPE: str = 'rayleigh'
-    LONG_SHAPE: str = 'gaussian'
+    mu_l: int = 0
+    mu_t: int = 0
 
     def __post_init__(self):
-        self.w = np.random.normal(self.mu_w, self.sig_w, self.n)
 
-        if self.LONG_SHAPE == "gaussian":
-            self.tau = np.random.normal(self.mu_tau, self.sig_tau, self.n)
-        elif self.LONG_SHAPE == "parabolic":
-            L = 4*self.sig_tau
-            tau = np.linspace(-L/2, L/2, 1000)
-            p = parabolic(tau, L)
-            self.tau = np.random.choice(tau, size=self.n, p=p/p.sum())
-        elif self.LONG_SHAPE == "binomial":
             self.tau, self.w = bivariate_binomial(
-                a=2*self.sig_tau, b=2*self.sig_w, n=self.n,
+            a=self.sig_tau,
+            b=self.sig_w,
+            n=self.n,
+            mu=self.mu_l,
             )
         else:
             error(f'Unrecognized longitudinal shape {self.LONG_SHAPE}!')
@@ -63,11 +57,11 @@ class Bunch:
         return self.sig_w/(self.beta**2*self.E)
 
     def derivative(self):
-        """compute particle derivative assuming gaussian longitudinal profile"""
+        """compute analytic particle distribution derivative"""
         dev = self.tau-self.mu_tau
-        var = self.sig_tau**2
-        lam = np.exp(-0.5*dev*dev/var)/np.sqrt(2*np.pi*var)
-        return -dev*lam/var
+        dlam = binomial_der(dev, sig=self.sig_tau, amp=self.N, mu=self.mu_l)
+        return dlam
+
 
     def update(self, FIXED_MU=False, FIXED_SIG=False):
         """update representative bunch statistics"""
@@ -120,22 +114,29 @@ class Bunch:
 
 @dataclass
 class Ring:
-    R: float
-    h: np.ndarray
-    Vg: np.ndarray
-    gamma_t: float
+    R: float = 100
+    h: int = 8
+    Vg: float = 80e3
+    gamma_t: float = 6.1
 
-    beta: float = 1
-    D: float = 0
-    b: float = np.inf
+    beta = (17, 17)
+    beta_p = (0, 0)
+
+    D = (2.66, 0)
+    b = (73e-3, 35e-3)
 
     vphi_s: np.ndarray = 0
 
     def __post_init__(self):
-        self.alpha = self.gamma_t**-2
+
         self.beta = np.array([self.beta]).T
+        self.beta_p = np.array([self.beta_p]).T
         self.D = np.array([self.D]).T
         self.b = np.array([self.b]).T
+
+        # twiss parameters
+        self.alpha = -0.5*self.beta_p
+        self.gamma = (1+self.alpha**2)/self.beta
 
     def G(self, phi):
         return np.cos(self.vphi_s) - np.cos(phi+self.vphi_s) - phi*np.sin(self.vphi_s)
@@ -165,6 +166,35 @@ class Tracker:
         self.tau_hat = self.T/self.ring.h/2
         # self.tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
 
+        if self.bunch.eps is None:
+            self.populate_emittance()
+
+    def populate_emittance(self, alpha=0):
+        bunch = self.bunch
+        ring = self.ring
+
+        # transverse coordinate
+        x, y = bivariate_binomial(
+            a=2*np.sqrt(ring.beta[0]*bunch.sig_eps),
+            b=2*np.sqrt(ring.beta[1]*bunch.sig_eps),
+            n=bunch.n,
+            mu=bunch.mu_t,
+        )
+
+        bunch.u = np.array([x, y])
+
+        # transverse phase advance
+        bunch.phi_t = np.array([
+            np.random.uniform(-np.pi, np.pi, bunch.n),
+            np.random.uniform(-np.pi, np.pi, bunch.n),
+        ])
+
+        # populate emittance
+        bunch.eps = ((bunch.u-ring.D*bunch.delta())/np.cos(bunch.phi_t))**2/ring.beta
+
+        # divergence coordinate
+        bunch.up = -np.sqrt(bunch.eps/ring.beta) * \
+            (alpha*np.cos(bunch.phi_t)+np.sin(bunch.phi_t))
     def H(self, tau, w):
         """return particle hamiltonion"""
         phi = self.ring.h*self.omega*tau
@@ -224,8 +254,8 @@ class Tracker:
     def a(self):
         bunch = self.bunch
         ring = self.ring
-        a = 2*np.sqrt(ring.beta*bunch.sig_eps +
-                      ring.D**2*bunch.sig_delta()**2)
+        a = 2*((ring.beta*bunch.sig_eps +
+                ring.D**2*bunch.sig_delta()**2)*(ring.beta*bunch.sig_eps))**(1/4)
         return a
 
     def separatrix(self, phi_hat=None, phi=None):
@@ -255,8 +285,8 @@ class Tracker:
         up = -np.sqrt(bunch.eps/ring.beta)*(alpha*np.cos(mu)+np.sin(mu))
 
         data = {
-            "x (mm)": u[0]*1e3, "x' (mrad)": up[0]*1e3,
-            "y (mm)": u[1]*1e3, "y' (mrad)": up[1]*1e3,
+            "x (mm)": bunch.u[0]*1e3, "x' (mrad)": bunch.up[0]*1e3,
+            "y (mm)": bunch.u[1]*1e3, "y' (mrad)": bunch.up[1]*1e3,
             "tau (ns)": bunch.tau*1e9, "w (MeV)": bunch.w*1e-6}
 
         keys = [
@@ -266,7 +296,7 @@ class Tracker:
             ["tau (ns)", 'w (MeV)'],
         ]
 
-        axes = plot_phase_space(data, keys, (2, 2), f"{title}")
+        fig, axes = plot_phase_space(data, keys, (2, 2), f"{title}")
 
         ax = axes.flatten()[-1]
         for phi_max in [ring.h*self.omega*bunch.sig_tau, np.pi-ring.vphi_s]:
@@ -274,21 +304,21 @@ class Tracker:
             ax.plot(xs*1e9, +ys.real*1e-6, 'm-')
             ax.plot(xs*1e9, -ys.real*1e-6, 'm-')
 
-        axv = ax.secondary_yaxis('right', functions=(self.MeV2mm, self.mm2MeV))
+        ax.secondary_yaxis('right', functions=(self.MeV2mm, self.mm2MeV))
         ax.annotate(r'$x$ (mm)', (1, 0.5), xycoords='axes fraction',
                     rotation=90, horizontalalignment='right', verticalalignment='center')
 
-        return axes
+        return fig, axes
 
     def mm2MeV(self, mm):
-        C = self.bunch.beta**2*self.bunch.E/self.ring.alpha/self.ring.R
+        C = self.bunch.beta**2*self.bunch.E/self.ring.R*self.ring.gamma_t**2
         return mm*1e-3*C*1e-6
 
     def MeV2mm(self, MeV):
-        C = self.bunch.beta**2*self.bunch.E/self.ring.alpha/self.ring.R
+        C = self.bunch.beta**2*self.bunch.E/self.ring.R*self.ring.gamma_t**2
         return MeV*1e6/C*1e3
 
-    def match(self, sig_w=None, sig_tau=None, k=0):
+    def match(self, sig_tau=None, sig_w=None, k=0):
         ring = self.ring
         bunch = self.bunch
 
@@ -323,4 +353,7 @@ class Tracker:
         print(f"mu_eff:{mu_eff:0.3g}")
         Vg = V_eff/mu_eff**2
         print(f"Vg:{Vg*1e-3:0.3g} kV")
+
+        self.ring.Vg = Vg
+        self.__post_init__()
         return Vg

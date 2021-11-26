@@ -9,14 +9,14 @@ def twiss(x, y):
     """return twiss parameters and phase-space ellipse for bivariate distribution"""
 
     cov = np.cov(x, y)
-    area = np.sqrt(np.linalg.det(cov))
+    eps = np.sqrt(np.linalg.det(cov))
 
     with np.errstate(divide='ignore', invalid='ignore'):
         twiss_parameters = {
-            'emittance': area,
-            'alpha': -cov[0, 1]/area,
-            'beta': cov[0, 0]/area,
-            'gamma': cov[1, 1]/area,
+            'emittance': eps,
+            'alpha': -cov[0, 1]/eps,
+            'beta': cov[0, 0]/eps,
+            'gamma': cov[1, 1]/eps,
         }
 
     ellipse_params = covariance_ellipse(cov)
@@ -28,10 +28,10 @@ def twiss(x, y):
     )
 
     caption = '\n'.join([
-        f"$\\epsilon$={twiss_parameters['emittance']:0.2e}",
-        f"$\\alpha$={twiss_parameters['alpha']:0.2f}",
-        f"$\\beta$={twiss_parameters['beta']:0.2f}",
-        f"$\\gamma$={twiss_parameters['gamma']:0.2f}",
+        f"$\\epsilon$={twiss_parameters['emittance']:0.3g}",
+        f"$\\alpha$={twiss_parameters['alpha']:0.3g}",
+        f"$\\beta$={twiss_parameters['beta']:0.3g}",
+        f"$\\gamma$={twiss_parameters['gamma']:0.3g}",
     ])
 
     return twiss_parameters, ellipse, caption
@@ -84,11 +84,6 @@ def compute_synchrotron_frequency(tau, T):
     f = freq[np.argmax(amp, axis=0)]
     tau_hat = np.max(tau, axis=0)
     return tau_hat, f
-def analyze_bunch_profiles(tau, t, lam, ):
-    """return BLO fit parameters"""
-    params_g = fit_gaussian(tau, lam)
-    params_o = fit_oscillator(t, params_g['var']**0.5)
-    return {'gaussian': params_g, 'oscillator': params_o}
 
 
 def analyze_bunch_profiles(tau, t, lam, show=False):
@@ -96,5 +91,5 @@ def analyze_bunch_profiles(tau, t, lam, show=False):
     params_g = fit_gaussian(tau, lam)
     params_b = fit_binomial(tau, lam)
     # params_o = fit_oscillator(t, params_g['var']**0.5)
-    params_o = fit_oscillator(t, params_b['L']/4)
+    params_o = fit_oscillator(t, params_b['sig'])
     return {'gaussian': params_g, 'oscillator': params_o, 'binomial': params_b}
