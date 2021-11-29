@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from scipy.constants import value, c
 
 from sylt.plotting import plot_phase_space
-from sylt.functions import binomial_der
+from sylt.functions import binomial, binomial_der, p_binomial
 from sylt.geometry import bivariate_binomial
 
 e = value('elementary charge')
@@ -29,21 +29,17 @@ class Bunch:
     q: int = 1      # particle charge
     E_0 = 938.272e6  # particle rest energy
 
-    mu_l: int = 0
-    mu_t: int = 0
+    mu_l: int = 1.1
+    mu_t: int = 1
 
     def __post_init__(self):
 
-            self.tau, self.w = bivariate_binomial(
+        self.tau, self.w = bivariate_binomial(
             a=self.sig_tau,
             b=self.sig_w,
             n=self.n,
             mu=self.mu_l,
-            )
-        else:
-            error(f'Unrecognized longitudinal shape {self.LONG_SHAPE}!')
-        if self.eps is None:
-            self.populate_emittance()
+        )
 
         self.gamma = self.E/self.E_0
         self.beta = np.sqrt(1-self.gamma**-2)
@@ -73,44 +69,6 @@ class Bunch:
         if FIXED_SIG:
             self.sig_w = np.nanstd(self.w)
             self.sig_tau = np.nanstd(self.tau)
-
-    def populate_emittance(self):
-        if self.TRAN_SHAPE == 'rayleigh':
-            self.eps = np.array([
-                np.random.rayleigh(self.sig_eps**0.5, self.n)**2,
-                np.random.rayleigh(self.sig_eps**0.5, self.n)**2,
-            ])
-        elif self.TRAN_SHAPE == "exponential":
-            self.eps = np.array([
-                np.random.exponential(self.sig_eps*2, self.n),
-                np.random.exponential(self.sig_eps*2, self.n),
-            ])
-        elif self.TRAN_SHAPE == 'parabolic':
-            L = 4*self.sig_eps
-            eq = np.linspace(L, 0, 1000, endpoint=False)
-            pq = parabolic(eq, L)
-            self.eps = np.array([
-                np.random.choice(eq, self.n, p=pq/pq.sum()),
-                np.random.choice(eq, self.n, p=pq/pq.sum()),
-            ])
-        elif self.TRAN_SHAPE == "uniform":
-
-            A = self.sig_eps*4
-
-            th = np.random.uniform(0, 2*np.pi, self.n)
-            r = np.random.uniform(0, A, self.n)**0.5
-
-            x = r*np.cos(th)
-            y = r*np.sin(th)
-
-            phi = np.random.uniform(0, 2*np.pi, self.n)
-            xp = np.sqrt(A-r**2)*np.cos(phi)
-            yp = np.sqrt(A-r**2)*np.sin(phi)
-
-            self.eps = (x**2+xp**2, y**2+yp**2)
-        else:
-            error(f'Unrecognized style <{self.TRAN_SHAPE}>')
-
 
 @dataclass
 class Ring:
@@ -164,7 +122,6 @@ class Tracker:
         self.nu = self.Omega/self.omega
 
         self.tau_hat = self.T/self.ring.h/2
-        # self.tau_hat = (np.pi-self.ring.vphi_s)/(self.ring.h*self.omega)
 
         if self.bunch.eps is None:
             self.populate_emittance()
@@ -173,28 +130,19 @@ class Tracker:
         bunch = self.bunch
         ring = self.ring
 
-        # transverse coordinate
-        x, y = bivariate_binomial(
-            a=2*np.sqrt(ring.beta[0]*bunch.sig_eps),
-            b=2*np.sqrt(ring.beta[1]*bunch.sig_eps),
-            n=bunch.n,
-            mu=bunch.mu_t,
-        )
+        bunch.eps = np.array([
+            np.random.rayleigh(bunch.sig_eps**0.5, bunch.n)**2,
+            np.random.rayleigh(bunch.sig_eps**0.5, bunch.n)**2,
+        ])
 
-        bunch.u = np.array([x, y])
-
-        # transverse phase advance
-        bunch.phi_t = np.array([
+        mu = np.array([
             np.random.uniform(-np.pi, np.pi, bunch.n),
             np.random.uniform(-np.pi, np.pi, bunch.n),
         ])
 
-        # populate emittance
-        bunch.eps = ((bunch.u-ring.D*bunch.delta())/np.cos(bunch.phi_t))**2/ring.beta
+        bunch.u = np.sqrt(ring.beta*bunch.eps)*np.cos(mu)+ring.D*bunch.delta()
+        bunch.up = -np.sqrt(bunch.eps/ring.beta)*(alpha*np.cos(mu)+np.sin(mu))
 
-        # divergence coordinate
-        bunch.up = -np.sqrt(bunch.eps/ring.beta) * \
-            (alpha*np.cos(bunch.phi_t)+np.sin(bunch.phi_t))
     def H(self, tau, w):
         """return particle hamiltonion"""
         phi = self.ring.h*self.omega*tau
@@ -275,14 +223,6 @@ class Tracker:
 
         ring = self.ring
         bunch = self.bunch
-
-        mu = np.array([
-            np.random.uniform(-np.pi, np.pi, bunch.n),
-            np.random.uniform(-np.pi, np.pi, bunch.n),
-        ])
-
-        u = np.sqrt(ring.beta*bunch.eps)*np.cos(mu)+ring.D*bunch.delta()
-        up = -np.sqrt(bunch.eps/ring.beta)*(alpha*np.cos(mu)+np.sin(mu))
 
         data = {
             "x (mm)": bunch.u[0]*1e3, "x' (mrad)": bunch.up[0]*1e3,
