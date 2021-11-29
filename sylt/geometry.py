@@ -4,15 +4,14 @@ from sylt.functions import binomial, p_binomial
 
 
 def bivariate_binomial(a, b, n, mu=1):
+    """return bivariate distribution of widths a, b and density projections of binomial mu"""
 
-    k = np.sqrt((4+mu*2)/(3+mu*2))
+    k = np.sqrt((4+mu)/(3+mu))
 
-    u = p_binomial(n, sig=1, mu=mu)
+    u = k*p_binomial(n, sig=1, mu=mu-0.5)
 
     th = np.random.uniform(-np.pi, np.pi, n)
-    x = k*a*u*np.cos(th)
-    y = k*b*u*np.sin(th)
-
-    print(f"sig_x:{np.nanstd(x):0.3f}\tsig_y:{np.nanstd(y):0.3f}")
+    x = a*u*np.cos(th)
+    y = b*u*np.sin(th)
 
     return x, y
