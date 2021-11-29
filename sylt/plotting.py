@@ -23,11 +23,11 @@ def plot_projections(x, y, ax, bins=100, hist_height=5):
     xc, xh, x_fit = project(x, bins)
     yc, yh, y_fit = project(y, bins)
 
-    axh.plot(xc, xh)
-    axv.plot(yh, yc)
+    axh.plot(xc, xh, 'k')
+    axv.plot(yh, yc, 'k')
 
-    axh.plot(xc, x_fit, ':')
-    axv.plot(y_fit, yc, ':')
+    axh.plot(xc, x_fit, 'k:')
+    axv.plot(y_fit, yc, 'k:')
 
     axh.set_ylim(0, hist_height*xh.max())
     axv.set_xlim(0, hist_height*yh.max())
@@ -65,6 +65,13 @@ def plot_phase_space(data, keys, shape=None, title=None):
                     rotation=90, verticalalignment='center')
 
         plot_projections(x1[ind], x2[ind], ax)
+
+        stats = '\n'.join([
+            f"$\mu$=({np.mean(x1[ind]):0.2g}, {np.mean(x2[ind]):0.2g})",
+            f"$\sigma$=({np.std(x1[ind]):0.2g}, {np.std(x2[ind]):0.2g})",
+        ])
+
+        ax.annotate(stats, (0, 1), xycoords='axes fraction', va='top')
 
     return fig, axes
 
