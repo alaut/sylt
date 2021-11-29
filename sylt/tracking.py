@@ -29,7 +29,7 @@ class Bunch:
     q: int = 1      # particle charge
     E_0 = 938.272e6  # particle rest energy
 
-    mu_l: int = 1.1
+    mu_l: int = 1.1 # quasi-parabolic
     mu_t: int = 1
 
     def __post_init__(self):
@@ -55,18 +55,18 @@ class Bunch:
     def derivative(self):
         """compute analytic particle distribution derivative"""
         dev = self.tau-self.mu_tau
-        dlam = binomial_der(dev, sig=self.sig_tau, amp=self.N, mu=self.mu_l)
+        dlam = binomial_der(dev, sig=self.sig_tau, amp=1, mu=self.mu_l)
         return dlam
 
 
     def update(self, FIXED_MU=False, FIXED_SIG=False):
         """update representative bunch statistics"""
 
-        if FIXED_MU:
+        if not FIXED_MU:
             self.mu_w = np.nanmean(self.w)
             self.mu_tau = np.nanmean(self.tau)
 
-        if FIXED_SIG:
+        if not FIXED_SIG:
             self.sig_w = np.nanstd(self.w)
             self.sig_tau = np.nanstd(self.tau)
 
@@ -134,14 +134,6 @@ class Tracker:
             np.random.rayleigh(bunch.sig_eps**0.5, bunch.n)**2,
             np.random.rayleigh(bunch.sig_eps**0.5, bunch.n)**2,
         ])
-
-        mu = np.array([
-            np.random.uniform(-np.pi, np.pi, bunch.n),
-            np.random.uniform(-np.pi, np.pi, bunch.n),
-        ])
-
-        bunch.u = np.sqrt(ring.beta*bunch.eps)*np.cos(mu)+ring.D*bunch.delta()
-        bunch.up = -np.sqrt(bunch.eps/ring.beta)*(alpha*np.cos(mu)+np.sin(mu))
 
     def H(self, tau, w):
         """return particle hamiltonion"""
@@ -224,9 +216,17 @@ class Tracker:
         ring = self.ring
         bunch = self.bunch
 
+        mu = np.array([
+            np.random.uniform(0, 2*np.pi, bunch.n),
+            np.random.uniform(0, 2*np.pi, bunch.n),
+        ])
+
+        u = np.sqrt(ring.beta*bunch.eps)*np.cos(mu)+ring.D*bunch.delta()
+        up = -np.sqrt(bunch.eps/ring.beta)*(alpha*np.cos(mu)+np.sin(mu))
+
         data = {
-            "x (mm)": bunch.u[0]*1e3, "x' (mrad)": bunch.up[0]*1e3,
-            "y (mm)": bunch.u[1]*1e3, "y' (mrad)": bunch.up[1]*1e3,
+            "x (mm)": u[0]*1e3, "x' (mrad)": up[0]*1e3,
+            "y (mm)": u[1]*1e3, "y' (mrad)": up[1]*1e3,
             "tau (ns)": bunch.tau*1e9, "w (MeV)": bunch.w*1e-6}
 
         keys = [
