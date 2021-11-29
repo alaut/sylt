@@ -61,7 +61,7 @@ def fit_binomial(x, Y):
             popt = [np.nan, np.nan, np.nan, np.nan]
         fit.append(popt)
     fit = np.array(fit)
-    return {'sig': fit[:, 0], 'amp': fit[:, 1], 'x0': fit[:, 2]}
+    return {'sig': fit[:, 0], 'amp': fit[:, 1], 'x0': fit[:, 2]}#,'mu': fit[:,3]}
 
 
 def fit_oscillator(x, y, omega=None):

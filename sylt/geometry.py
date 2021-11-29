@@ -1,6 +1,6 @@
 import numpy as np
 
-from sylt.functions import binomial, p_binomial
+from sylt.functions import p_binomial
 
 
 def bivariate_binomial(a, b, n, mu=1):

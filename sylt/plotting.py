@@ -1,33 +1,29 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import scipy.special as sp
 import numpy as np
 import matplotlib.cm as cm
 
 from sylt.analysis import project, twiss
-from sylt.fitting import oscillator, gauss
+from sylt.fitting import oscillator, gauss, moments
 from sylt.functions import binomial
 
-from sylt.fitting import oscillator
 
-from scipy.special import ellipk
-
-from datetime import datetime
-
-
-def plot_projections(x, y, ax, bins=100, hist_height=5):
+def plot_projections(x, y, ax=None, bins=100, hist_height=5):
     """plot projections of x, y distribution on a given axes"""
+
+    if ax is None:
+        fig, ax = plt.subplots(constrained_layout=True)
 
     axh, axv = ax.twinx(), ax.twiny()
 
-    xc, xh, x_fit = project(x, bins)
-    yc, yh, y_fit = project(y, bins)
+    xc, xh = project(x, bins)
+    yc, yh = project(y, bins)
 
     axh.plot(xc, xh, 'k')
     axv.plot(yh, yc, 'k')
 
-    axh.plot(xc, x_fit, 'k:')
-    axv.plot(y_fit, yc, 'k:')
+    # axh.plot(xc, x_fit, 'k:')
+    # axv.plot(y_fit, yc, 'k:')
 
     axh.set_ylim(0, hist_height*xh.max())
     axv.set_xlim(0, hist_height*yh.max())
@@ -42,9 +38,17 @@ def plot_phase_space(data, keys, shape=None, title=None):
     """plots phase space distributions given data and keys"""
 
     if shape is None:
-        shape(1, len(keys))
+        shape = [1, len(keys)]
 
     fig, axes = plt.subplots(*shape, constrained_layout=True, num=title)
+
+    try:
+        axes = axes.flatten()
+    except:
+        pass
+
+    if len(keys) == 1:
+        axes = [axes]
 
     t = np.linspace(0, 2*np.pi, 50)
 
@@ -120,10 +124,15 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
         figs['waterfall'], ax1 = plt.subplots(constrained_layout=True)
         for key, y, linespec in series:
             ax1.plot(tau*1e9, 1e3*(t+k*y)[:, ind], linespec)
+            # for i in range(ind.size):
+            #     ax1.plot(tau*1e9, 1e3*(t+k*y)
+            #              [:, ind[i]], linespec, color=cm.jet(i/ind.size))
             ax1.plot([], [], f"k{linespec}", label=key)
         ax1.set_xlabel(r"$\tau$ (ns)")
         ax1.set_ylabel(r"$t$ (ms)")
-        ax1.set_xlim(1e9*np.mean(4*fit['binomial']['sig'])*np.array([-0.75, 0.75]))
+        # ax1.set_xlim(1e9*tau.min(), 1e9*tau.max())
+        ax1.set_xlim(1e9*np.mean(4*fit['binomial']
+                     ['sig'])*np.array([-0.75, 0.75]))
         ax1.legend(loc='upper right')
 
     if contour:
@@ -134,7 +143,7 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
         ax2.set_xlabel(r"$t$ (ms)")
         figs['contour'].colorbar(
             pcm, ax=ax2, label=r'$\lambda(\tau)$ (ns$^{-1}$)')
-        ax2.plot(1e3*t, 1e9*fit['gaussian']['mu'],'k-',
+        ax2.plot(1e3*t, 1e9*fit['gaussian']['mu'], 'k-',
                  label=r"$\mu_{\sigma_\tau}(t)$")
         ax2.annotate(f"$<N>$:{np.mean(N):0.2e}",
                      xy=(0, 0), xycoords='axes fraction')
@@ -143,7 +152,6 @@ def plot_bunch_profiles(tau, t, lam, fit, waterfall=True, contour=True, decay=Tr
             1e9*(np.mean(fit['gaussian']['mu']+3*fit['gaussian']['var']**0.5)),
             1e9*(np.mean(fit['gaussian']['mu']-3*fit['gaussian']['var']**0.5)),
         )
-
 
     if decay:
 

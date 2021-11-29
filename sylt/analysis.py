@@ -1,8 +1,11 @@
 import numpy as np
-from scipy.stats import norm
 
-from sylt.fitting import fit_gaussian, fit_oscillator, fit_binomial
+
+from sylt.fitting import fit_gaussian, fit_oscillator, fit_binomial, moments
+from sylt.functions import binomial
 from sylt.tools import centers
+
+from scipy.optimize import curve_fit
 
 
 def twiss(x, y):
@@ -72,9 +75,12 @@ def project(x, bins=100):
     """return domain, hist and gaussian fit of x"""
     h, xe = np.histogram(x, bins, density=True)
     xc = centers(xe)
-    with np.errstate(divide='ignore'):
-        fit = norm.pdf(xc, *norm.fit(x))
-    return xc, h, fit
+
+    # x0, var = moments(xc, h)
+    # popt, pcov = curve_fit(binomial, xc, h, p0=[var**0.5, h.max(), x0, 1])
+    # fit = binomial(xc, *popt)
+    # print("sig{:0.2f}amp{:0.2f}x0{:0.2f}mu{:0.2f}".format(*popt))
+    return xc, h
 
 
 def compute_synchrotron_frequency(tau, T):
