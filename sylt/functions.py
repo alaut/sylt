@@ -22,7 +22,7 @@ def binomial(x, sig=1, amp=1, x0=0, mu=1.12):
     return y.real
 
 
-def p_binomial(n, sig=1, mu=1, show=False):
+def p_binomial(n, sig=1, mu=1):
     L = sig*2*np.sqrt(3+2*mu)
 
     x = np.linspace(L/2, 0, 999, endpoint=False)
@@ -31,7 +31,7 @@ def p_binomial(n, sig=1, mu=1, show=False):
     p = f*x
 
     X = np.random.choice(x, n, p=p/p.sum())
-    
+
     return X
 
 
