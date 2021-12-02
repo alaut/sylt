@@ -4,3 +4,4 @@ description: SYnchrotron Longitudinal Tracker
 github_username:  alaut
 
 theme: jekyll-theme-cayman
+show_downloads: true
