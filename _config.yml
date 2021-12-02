@@ -3,4 +3,4 @@ description: SYnchrotron Longitudinal Tracker
 
 github_username:  alaut
 
-theme: minima
+theme: jekyll-theme-cayman
