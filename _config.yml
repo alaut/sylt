@@ -1,6 +1,7 @@
 title: sylt
 description: SYnchrotron Longitudinal Tracker
-
 github_username:  alaut
 
-theme: jekyll-theme-cayman
+collections:
+  notes:
+    output: True

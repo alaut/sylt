@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: home
 ---
 
 # [sylt](https://alaut.github.io/sylt/)
