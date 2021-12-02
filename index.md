@@ -1,7 +1,3 @@
----
-layout: page
----
-
 # [sylt](https://alaut.github.io/sylt/)
 
 **SY**nchrotron **L**ongitudinal **T**racker
