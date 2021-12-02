@@ -57,4 +57,5 @@ we have
 $$\frac{dT}{T} = \frac{\eta}{\beta^2}\frac{dE}{E}.$$
 
 Our equations of motion can be succinctly written as
+
 $$\dot{\tau} = \frac{\eta}{\beta_s^2E_s}w \qquad \dot{w} = \frac{qV_g}{T_s}(\sin\varphi-\sin\varphi_s).$$
