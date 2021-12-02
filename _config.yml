@@ -1,1 +1,6 @@
-theme: jekyll-theme-cayman
+title: sylt
+description: SYnchrotron Longitudinal Tracker
+
+github_username:  alaut
+
+theme: minima
