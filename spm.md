@@ -1,11 +1,11 @@
 ---
-title: Equations of Motion
+title: Single Particle Motion
 date: December 2, 2021
 layout: page
-permalink: eom
+permalink: spm
 ---
 
-# Equations of Motion
+## Equations of Motion
 
 Consider the relative time and energy coordinates
 
@@ -59,3 +59,43 @@ $$\frac{dT}{T} = \frac{\eta}{\beta^2}\frac{dE}{E}.$$
 Our equations of motion can be succinctly written as
 
 $$\dot{\tau} = \frac{\eta}{\beta_s^2E_s}w \qquad \dot{w} = \frac{qV_g}{T_s}(\sin\varphi-\sin\varphi_s).$$
+
+## Synchrotron Frequency
+
+Defining the relative phase coordinate
+
+$$\phi = \varphi - \varphi_s=h\omega_s\tau$$
+
+we can rewrite the drift equation as
+
+$$\dot{w} = \frac{qV_g}{T_s}g(\phi)$$
+
+where $g(\phi) = \sin\varphi-\sin\varphi_s$. For small amplitude oscillations wher $\phi\to0$ we can approximate this function by it's gradient
+
+$$g(\phi\to0) \approx g'(\phi)\phi = h\omega_s\tau\cos\varphi_s$$
+
+Taking the second derivative of $\tau$ and substituting in for $\dot{w}$ yields the following 
+
+$$\ddot{\tau}=\frac{h\omega_s^2\eta}{\beta_s^2E_s}\frac{qV_g}{2\pi}\cos\varphi_s\tau$$
+
+or
+
+$$\ddot{\tau}+\Omega_s^2\tau=0$$
+
+where the __synchronous synchrotron frequency__ is defined by
+
+$$\Omega_s^2=-\frac{h\omega_s^2\eta}{\beta_s^2E_s}\frac{qV_g}{2\pi}\cos\varphi_s.$$
+
+Accordingly for small amplitude oscillations, a particle's whose maximum amplitude in phase-space is defined by $\hat{\tau}$ and $\hat{w}$ will follow elliptical trajectories given by
+
+$$\tau=\hat{\tau}\cos\Omega_st \qquad \hat{w} = \hat{w} \sin\Omega_st.$$
+
+## Hamiltonion
+
+The equations of motion that satisfy hamilton's equations
+
+$$\dot{\tau} = \frac{\partial H}{\partial w} \qquad \dot{w}=-\frac{\partial H}{\partial \tau}$$
+
+can be derived from the following hamiltonion
+
+$$H=\frac{1}{2}\frac{\eta}{\beta_s^2E_s}w^2-\frac{q}{T_s}\int V(\tau)d\tau.$$
