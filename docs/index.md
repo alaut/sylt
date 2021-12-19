@@ -73,7 +73,7 @@ tracker.clean()
 tracker.show()
 ```
 
-![demo](./examples/figs/demo.png)
+![demo](./figs/demo.png)
 
 By setting ```Tracker.UPDATE = False```, macroparticles can be evaluated as ghost particles wherein the characteristic bunch statistics used to determine induced space charge voltage are held constant. Accordingly, the __tune spread__ of single particle motion (SPM), __tune shift__ of space charge (SC) and __tune blur__ due to effects of transverse motion (TM) can be compared by tracking the evolution of monoenergetic ghost particles.
 
@@ -96,7 +96,7 @@ for key, tracker in trackers.items():
         ax.plot(tracker.bunch.tau, tracker.bunch.w, label=key)
 ```
 
-![comparison](./examples/figs/comparison.gif)
+![comparison](./figs/comparison.gif)
 
 The relative time evolution of particles can be assessed by appending time data into an array and then computing an FFT to return a particle's synchrotron frequency as a function of it's maximum oscillation amplitude.
 
@@ -120,7 +120,7 @@ for i, (key, tracker) in enumerate(trackers.items()):
 
 The evolving relative time data can be processed and depicted as a synchrotron frequency spectrum with using __sylt.plotting.plot_tune__.
 
-![tune](./examples/figs/tune.png)
+![tune](./figs/tune.png)
 
 ## References
 

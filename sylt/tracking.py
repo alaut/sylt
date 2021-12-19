@@ -30,7 +30,12 @@ class Bunch:
     E_0 = 938.272e6  # particle rest energy
 
     mu_l: int = 1.1 # quasi-parabolic
-    mu_t: int = 1
+    mu_t: int = 1   # parabolic
+
+    FROZEN_MEAN: bool=False
+    FROZEN_WIDTH: bool=False
+
+    FUDGE_FACTOR: float=1   # used to artificially change bunch length
 
     def __post_init__(self):
 
@@ -55,18 +60,19 @@ class Bunch:
     def derivative(self):
         """compute analytic particle distribution derivative"""
         dev = self.tau-self.mu_tau
-        dlam = binomial_der(dev, sig=self.sig_tau, amp=1, mu=self.mu_l)
+        sig = self.sig_tau*self.FUDGE_FACTOR
+        amp = self.N/self.FUDGE_FACTOR
+        dlam = binomial_der(dev, sig=sig, amp=amp, mu=self.mu_l)
         return dlam
-
 
     def update(self, FIXED_MU=False, FIXED_SIG=False):
         """update representative bunch statistics"""
 
-        if not FIXED_MU:
+        if not self.FROZEN_MEAN:
             self.mu_w = np.nanmean(self.w)
             self.mu_tau = np.nanmean(self.tau)
 
-        if not FIXED_SIG:
+        if not self.FROZEN_WIDTH:
             self.sig_w = np.nanstd(self.w)
             self.sig_tau = np.nanstd(self.tau)
 
@@ -108,10 +114,6 @@ class Tracker:
     bunch: object
     ring: object
 
-    UPDATE: bool = True
-    FIXED_MU: bool = False
-    FIXED_SIG: bool = False
-
     def __post_init__(self):
         self.eta = -(1/self.bunch.gamma**2-1/self.ring.gamma_t**2)
         self.omega = self.bunch.beta*c/self.ring.R
@@ -147,7 +149,7 @@ class Tracker:
 
     def V_W(self, ImZ_n):
         """compute wakefield voltage"""
-        return -e*self.bunch.N/self.omega*ImZ_n*self.bunch.derivative()
+        return -e/self.omega*ImZ_n*self.bunch.derivative()
 
     def V_SC(self):
         """compute space-charge voltage"""
@@ -167,8 +169,8 @@ class Tracker:
         return self.V_W(ImZ_n)
 
     def track(self):
-        if self.UPDATE:
-            self.bunch.update(self.FIXED_MU, self.FIXED_SIG)
+
+        self.bunch.update()
 
         if self.bunch.N > 0:
             V = self.V_RF() + self.V_SC()

@@ -1,8 +1,9 @@
 ---
 title: Single Particle Motion
+permalink: spm
+author: Alex Laut
 date: December 2, 2021
 layout: page
-permalink: spm
 ---
 
 ## Equations of Motion
@@ -99,3 +100,39 @@ $$\dot{\tau} = \frac{\partial H}{\partial w} \qquad \dot{w}=-\frac{\partial H}{\
 can be derived from the following hamiltonion
 
 $$H=\frac{1}{2}\frac{\eta}{\beta_s^2E_s}w^2-\frac{q}{T_s}\int V(\tau)d\tau.$$
+
+## Synchrotron Frequency Spread
+
+Our Hamiltonion can be written as follows
+
+$$H = \frac{1}{2}\frac{\eta}{\beta_s^2E_s} w^2-\frac{qV_g}{2\pi h}G(\phi)$$
+
+accordingly
+
+$$w = \sqrt{H+\frac{qV_g}{2\pi h}G(\phi)}$$
+
+where 
+
+$$H = \frac{1}{2}\frac{\eta}{\beta_s^2E_s} \hat{w}^2 = -\frac{qV_g}{2\pi h}G(\hat{\phi}).$$
+
+Therefore
+
+$$w = \sqrt{\frac{qV_g}{2\pi h}(G(\phi)-G(\hat{\phi}))}$$
+
+From our EOM $\dot{\tau} = \kappa w$ and that $\phi = h\omega_s\tau$ we can generate the following
+
+$$\dot{\phi} = h\omega_s\frac{\eta}{\beta_s^2E_s}\sqrt{\frac{qV_g}{2\pi h}(G(\phi)-G(\hat{\phi}))}$$
+
+Defining
+
+$$W(\phi) = \frac{G(\phi)}{\cos\varphi_s}$$
+
+we can write the following
+
+$$\dot{\phi} = \Omega_s^2\sqrt{2(W(\phi)-W(\hat{\phi}))}$$
+
+Integrating our phase equation yields
+
+$$\frac{\Omega(\hat{\phi})}{\Omega_s} \approx 1-\frac{\hat{\phi}^2}{16}$$
+
+Accordingly, we see a parabolic relationship with the sycnhrotron frequency of particles with non-ideal oscillation amplitudes. We call this __Synchortron Freuency Spread__.

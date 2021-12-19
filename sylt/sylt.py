@@ -7,7 +7,7 @@ from sylt.tracking import Ring, Bunch, Tracker
 from sylt.tools import centers
 
 
-def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
+def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, NUM_TURNS=12_000):
     """broad analysis of BLO with options to benchmark with simulation"""
 
     out = {}
@@ -19,8 +19,8 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
         out['exp']['figs'] = plot_bunch_profiles(
             tau, t, lam, out['exp']['fit'])
 
-    if simulate:
-        for mode in ['SC+TM', 'SC']:
+    if NUM_TURNS > 0:
+        for mode in ['SC+TM']:  # , 'SC']:
             out[mode] = {}
             eps = None if mode == 'SC+TM' else 0
 
@@ -37,10 +37,11 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
                 N=N,
                 sig_eps=sig_eps,
                 eps=eps,
+                FROZEN_MEAN=True,
+                # FUDGE_FACTOR=0.87,
             )
 
-            ps = Ring()
-            tracker = Tracker(bunch, ps, FIXED_MU=True)
+            tracker = Tracker(bunch, Ring())
 
             tracker.estimate_voltage(
                 Omega=out['exp']['fit']['oscillator']['omega']/2)
@@ -52,26 +53,24 @@ def benchmark_bunch_profiles(tau, t, lam, sig_eps, show=True, simulate=False):
 
             tracker.show(f'{mode}-start')
 
-            turns = np.arange(12_000)
+            turns = np.arange(NUM_TURNS)
             t = turns*tracker.T
             tau = np.linspace(-1, 1, 99)*bunch.sig_tau*3
             dt = np.mean(np.diff(tau))
 
             LAM = []
-            print('tracking ...')
-            
-            for turn in turns:
+            for turn in range(NUM_TURNS):
                 tracker.track()
 
                 if turn % 1_000 == 0:
                     tracker.clean()
-                    # tracker.show(f"{mode}-{turn}")
+                    msg = f"{mode}-{turn} of {NUM_TURNS}"
+                    print(msg)
+                    # tracker.show(msg)
 
                 lam, _ = np.histogram(tracker.bunch.tau, tau)
                 LAM.append(lam/dt/tracker.bunch.n*N)
             LAM = np.array(LAM)
-
-            print('finished tracking!')
 
             tracker.show(f'{mode}-stop')
 

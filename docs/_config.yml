@@ -1,9 +1,4 @@
 title: sylt
 description: SYnchrotron Longitudinal Tracker
 github_username:  alaut
-
 theme: minima
-
-collections:
-  notes:
-    output: True
