@@ -89,7 +89,7 @@ $$\Omega_s^2=-\frac{h\omega_s^2\eta}{\beta_s^2E_s}\frac{qV_g}{2\pi}\cos\varphi_s
 
 Accordingly for small amplitude oscillations, a particle's whose maximum amplitude in phase-space is defined by $\hat{\tau}$ and $\hat{w}$ will follow elliptical trajectories given by
 
-$$\tau=\hat{\tau}\cos\Omega_st \qquad \hat{w} = \hat{w} \sin\Omega_st.$$
+$$\tau=\hat{\tau}\cos\Omega_st \qquad w = \hat{w} \sin\Omega_st.$$
 
 ## Hamiltonion
 
