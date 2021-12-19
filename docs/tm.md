@@ -24,7 +24,7 @@ $$\mu(s) = \int_0^s\frac{ds}{\beta(s)}$$
 
 For a particle within a uniform transverse bunch distribution in a long round beam, the longitudinal space charge fields can be described by the following geometry factor
 
-$$g(r) = \frac{1}{2}-\ln\frac{b}{a}-\frac{1}2{}\frac{r^2}{a^2}.$$
+$$g(r) = \frac{1}{2}+\ln\frac{b}{a}-\frac{1}{2}\frac{r^2}{a^2}.$$
 
 If we approximate that
 
