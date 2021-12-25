@@ -14,10 +14,7 @@ $$\tau = t-t_s\qquad w=W-W_s,$$
 
 where $t$ represents time and $W$ represents particle energy. Subscripted variables indicate the synchronous particle within a synchrotron.
 
-## Kick
-
-
-The following 
+The particle __kick__
 
 $$\Delta W = qV_g\sin\varphi,$$
 
@@ -26,8 +23,6 @@ describes the discrete energy gain of a particle passing through an RF gap of vo
 Averaged across one synchrotron period $T_s$, the instantaneous relative energy gain can be given by
 
 $$\dot{w}=\frac{\Delta w}{T_s} = \frac{qV_g}{T_s}(\sin\varphi-\sin\varphi_s).$$
-
-## Drift
 
 Using logarithmic derivatives, the relationship between revolution period $T$, path circumference $C$ and relative velocity $\beta$ can be described by
 
@@ -41,7 +36,7 @@ Using the relationship
 
 $$\frac{d\beta}{\beta} = \frac{1}{\gamma^2}\frac{dp}{p}$$
 
-if we subsitute for $dC/C$ and $d\beta/\beta$ and get
+if we subsitute for $dC/C$ and $d\beta/\beta$ we get
 
 $$\frac{dT}{T} = \left(\alpha - \frac{1}{\gamma^2}\right)\frac{dp}{p} = \eta\frac{dp}{p},$$
 
@@ -53,13 +48,15 @@ From
 
 $$\frac{dp}{p}=\frac{1}{\beta^2}\frac{dE}{E}$$
 
-we have
+we have the particle __drift__ described by
 
 $$\frac{dT}{T} = \frac{\eta}{\beta^2}\frac{dE}{E}.$$
 
 Our equations of motion can be succinctly written as
 
-$$\dot{\tau} = \frac{\eta}{\beta_s^2E_s}w \qquad \dot{w} = \frac{qV_g}{T_s}(\sin\varphi-\sin\varphi_s).$$
+$$\dot{\tau} = \frac{\eta}{\beta_s^2E_s}w \qquad \dot{w} = \frac{qV_g}{T_s}g(\phi).$$
+
+where $g(\phi) = \sin\varphi-\sin\varphi_s$.
 
 ## Synchrotron Frequency
 
@@ -67,11 +64,7 @@ Defining the relative phase coordinate
 
 $$\phi = \varphi - \varphi_s=h\omega_s\tau$$
 
-we can rewrite the drift equation as
-
-$$\dot{w} = \frac{qV_g}{T_s}g(\phi)$$
-
-where $g(\phi) = \sin\varphi-\sin\varphi_s$. For small amplitude oscillations wher $\phi\to0$ we can approximate this function by it's gradient
+for small amplitude oscillations where $\phi\to0$ we can approximate this function by it's gradient
 
 $$g(\phi\to0) \approx g'(\phi)\phi = h\omega_s\tau\cos\varphi_s$$
 
@@ -103,36 +96,41 @@ $$H=\frac{1}{2}\frac{\eta}{\beta_s^2E_s}w^2-\frac{q}{T_s}\int V(\tau)d\tau.$$
 
 ## Synchrotron Frequency Spread
 
-Our Hamiltonion can be written as follows
+A Hamiltonion can be written as follows
 
 $$H = \frac{1}{2}\frac{\eta}{\beta_s^2E_s} w^2-\frac{qV_g}{2\pi h}G(\phi)$$
 
-accordingly
+where
+
+$$G(\phi) = -(\cos(\phi + \varphi_s) + \phi\sin\varphi_s) + \cos\varphi_sd.$$
+
+Accordingly, a particle's energy trajectory $w(\phi)$ is a function of it's preserved hamiltonion value $H$
 
 $$w = \sqrt{H+\frac{qV_g}{2\pi h}G(\phi)}$$
 
-where 
+where $H$ is defined by the particles maximum oscillation amplitudes
 
 $$H = \frac{1}{2}\frac{\eta}{\beta_s^2E_s} \hat{w}^2 = -\frac{qV_g}{2\pi h}G(\hat{\phi}).$$
 
 Therefore
 
-$$w = \sqrt{\frac{qV_g}{2\pi h}(G(\phi)-G(\hat{\phi}))}$$
+$$w = \sqrt{\frac{qV_g}{2\pi h}(G(\phi)-G(\hat{\phi}))}.$$
 
-From our EOM $\dot{\tau} = \kappa w$ and that $\phi = h\omega_s\tau$ we can generate the following
+From our EOM $\dot{\tau} = \frac{\eta}{\beta_s^2E_s} w$ and that $\phi = h\omega_s\tau$ we can generate the following
 
 $$\dot{\phi} = h\omega_s\frac{\eta}{\beta_s^2E_s}\sqrt{\frac{qV_g}{2\pi h}(G(\phi)-G(\hat{\phi}))}$$
 
-Defining
+Defining that $W(\phi) = G(\phi)/ \cos\varphi_s$, we can write the following
 
-$$W(\phi) = \frac{G(\phi)}{\cos\varphi_s}$$
+$$\dot{\phi} = \Omega_s\sqrt{2(W(\phi)-W(\hat{\phi}))}$$
 
-we can write the following
+The __normalized synchrotron tune__ $\mu$ can be derived
 
-$$\dot{\phi} = \Omega_s^2\sqrt{2(W(\phi)-W(\hat{\phi}))}$$
+$$\mu = \frac{2\pi}{\Omega_s}/\oint \frac{d\phi}{\dot{\phi}}=2\pi/\oint \frac{d\phi}{\sqrt{2(W(\phi)-W(\hat{\phi}))}}$$
 
-Integrating our phase equation yields
+For the __non-accelerating condition__ where $\varphi_s=0$ and  $W(\phi)=G(\phi) = 1-\cos\phi$, the normalized tune is given analytically by
+$$\mu = 2\pi/\oint\frac{d\phi}{\sqrt{2(\cos\hat{\phi}-\cos\phi)}}=\frac{\pi}{2K(\hat{\phi}/2)} \approx 1-\frac{\hat{\phi}^2}{16}+\mathcal{O}(\hat{\phi}^4)$$
 
-$$\frac{\Omega(\hat{\phi})}{\Omega_s} \approx 1-\frac{\hat{\phi}^2}{16}$$
+Accordingly, we see a parabolic relationship with the synchrotron frequency of particles with non-ideal oscillation amplitudes. We call this __Synchrotron Frequency Spread__.
 
-Accordingly, we see a parabolic relationship with the sycnhrotron frequency of particles with non-ideal oscillation amplitudes. We call this __Synchortron Freuency Spread__.
+![normalized Synchrotron Frequency Spread](figs/tune_spread.svg)
