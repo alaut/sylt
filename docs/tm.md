@@ -8,7 +8,7 @@ layout: page
 
 ## Betatronic Motion
 
-The transvers position of a particle $u$ along longitudinal coordinate $s$ is described by
+The transverse position of a particle $u$ along longitudinal coordinate $s$ is described by
 
 $$u(s) = \sqrt{\beta(s)\epsilon}\cos\phi+D\delta$$
 
@@ -18,13 +18,14 @@ $$\phi = \mu(s) + \mu_0$$
 
 where $\mu_0$ is an integration constant and
 
-$$\mu(s) = \int_0^s\frac{ds}{\beta(s)}$$
+$$\mu(s) = \int_0^s\frac{ds}{\beta(s)}.$$
 
 ## Effective Geometry Factor
 
 For a particle within a uniform transverse bunch distribution in a long round beam, the longitudinal space charge fields can be described by the following geometry factor
 
-$$g(r) = \frac{1}{2}-\ln\frac{b}{a}-\frac{1}2{}\frac{r^2}{a^2}.$$
+$$g(r) = \begin{cases}\frac{1}{2}+\ln\frac{b}{a}-\frac{1}2{}\frac{r^2}{a^2} & r < a \\ \ln \frac{b}{r} & r > a
+\end{cases}.$$
 
 If we approximate that
 
