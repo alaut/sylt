@@ -1,3 +1,3 @@
 # sylt
 
-Documentation for **sylt** can be found at [here](https://alaut.github.io/sylt).
+You can find documentation for **sylt** [here](https://alaut.github.io/sylt) !
