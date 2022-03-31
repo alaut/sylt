@@ -127,3 +127,5 @@ The evolving relative time data can be processed and depicted as a synchrotron f
 
 - A. Laut and A. Lasheen, “[Influence of Transverse Motion on Longitudinal Space Charge in the CERN PS](https://drive.google.com/open?id=1AdkxdEvXXhXO1ewIXUXm31VhAgo93jxw&authuser=alexanderlaut%40gmail.com&usp=drive_fs),” presented at the 64th ICFA Advanced Beam Dynamics Workshop, Fermilab, 2021.
 
+- A. Laut, “Longitudinal Space Charge Modeling in the CERN PS,” Paris-Saclay University, 2021.
+[http://cds.cern.ch/record/2801220](http://cds.cern.ch/record/2801220)
